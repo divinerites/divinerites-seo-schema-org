@@ -33,3 +33,19 @@
   officeHorairesJours = "my real variable name"
   officeHorairesOpen  = "my real variable name"
   officeHorairesClose = "my real variable name"
+
+  # Used by restaurant
+  servesCuisine        = "TODO"
+  acceptsReservations  = "TODO"
+  hasMenu              = "TODO"
+
+  # Used by vacationrental (chalets)
+  numberOfBedrooms     = "TODO"
+  occupancy            = "TODO"
+  amenityFeature       = "TODO"
+  # numberOfRooms et petsAllowed déjà définis pour lodgingbusiness, réutilisés ici
+
+  # Used by eventvenue (mariages, séminaires)
+  maximumAttendeeCapacity = "TODO"
+  smokingAllowed          = "TODO"
+  # amenityFeature déjà défini ci-dessus, réutilisé ici

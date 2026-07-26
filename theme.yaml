@@ -16,10 +16,14 @@ features:
 - Version 1.2 - 22 juillet - Tout en Asset
 - Version 2.0 - 26 juillet 2026 - Refactoring performance et robustesse
 - Factorisation des variables communes entre types schema.org
-- Génération JSON-LD via jsonify (au lieu de concaténation manuelle)
-- Mise en cache des variables SEO invariantes (partialCached, multilingue)
-- Garde-fou templates.Exists sur les typeseo non implémentés
+- Génération JSON-LD via jsonify
+- Mise en cache des variables SEO invariantes avec gestion multilingue
+- Vérification templates.Exists pour les types non implémentés
+- Version 2.1 - 26 juillet 2026 - Nouveaux types métier
+- Ajout de Restaurant
+- Ajout de VacationRental
+- Ajout de EventVenue
 min_version: 0.70.0
 
 author:
-name: Didier Divinerites
+name: Didier Georgieff

@@ -2,17 +2,28 @@
 
 ## About
 
-Put schema.org on Web pages and LocalBusiness based on local variables from config.toml
+Put schema.org on Web pages and business/location pages based on local variables from `config.toml`.
+
+This library keeps a generic mapping layer between:
+- the schema.org fields expected by the partials;
+- the real variable names used by each Hugo site.
 
 ## Changelog
 
+### v2.1 - 26 juillet 2026
+
+- Add support for `Restaurant`
+- Add support for `VacationRental`
+- Add support for `EventVenue`
+- Document new `params.seo_json` mappings for restaurant, chalet rental and private events pages
+
 ### v2.0 - 26 juillet 2026
 
-- **Performance** : les variables SEO invariantes (social, logo, geo, adresse, téléphone, horaires, priceRange) sont désormais mises en cache via `partialCached`, ventilé par langue pour les sites multilingues.
-- **Robustesse** : le JSON-LD est généré via `jsonify` sur un `dict` Go-template plutôt que par concaténation manuelle de texte, ce qui évite un JSON invalide si une valeur contient un guillemet ou un caractère spécial.
-- **Simplification** : le bloc d'initialisation des variables communes (partagé entre `LocalBusiness`, `LodgingBusiness`, etc.) est factorisé dans `seo_common_vars.html`, réduisant la duplication pour l'ajout de futurs types.
-- **Fiabilité du build** : un `typeseo` sans partial correspondant ne fait plus planter le build ; un avertissement explicite est émis à la place (`templates.Exists`).
-- Le calcul du fingerprint de l'image principale n'est plus dupliqué entre les champs `image` et `photo`.
+- **Performance**: invariant SEO variables (social, logo, geo, address, phone, opening hours, priceRange) are cached with `partialCached`, split by language for multilingual sites
+- **Robustness**: JSON-LD is generated with `jsonify` from Go template `dict` objects instead of manual string concatenation
+- **Simplification**: common variable initialization shared by `LocalBusiness`, `LodgingBusiness`, etc. is now factorized in `seo_common_vars.html`
+- **Build safety**: a missing `typeseo` partial no longer breaks the Hugo build; a clear warning is emitted instead with `templates.Exists`
+- The main image fingerprint is no longer computed twice for `image` and `photo`
 
 ### v1.2 - 22 juillet 2020
 
@@ -24,10 +35,11 @@ Put schema.org on Web pages and LocalBusiness based on local variables from conf
 
 ## Usage
 
-1 - You have to give the correspondance for all those `params.seo_json` fields.
-2 - If you want specifics seo on a page, add `typeseo = ["localbusiness", "campsite", "whatever type"]` to your Params and/or frontmatter.
+1 - Define the mapping for all required `params.seo_json` fields.
+2 - If you want specific schema.org markup on a page, add `typeseo = ["localbusiness", "restaurant", "vacationrental", "eventvenue", "whatever type"]` in Params and/or frontmatter.
+3 - The library will automatically load the matching partial `seo_metadata_js_<type>.html`.
 
-For example
+Example:
 
 ```toml
 [params.seo_json]
@@ -45,9 +57,9 @@ For example
   region = "Alsace"
 ```
 
-### config.toml
+### `config.toml`
 
-File : `config.toml`
+File: `config.toml`
 
 ```toml
 [params.seo_json]
@@ -58,7 +70,7 @@ File : `config.toml`
   image             = "my real variable name"
   defaultKeywords   = "my real variable name"
 
-  # Used by localbusiness
+  # used by localbusiness / lodgingbusiness / restaurant / vacationrental / eventvenue
   logo              = "my real variable name"
   geo_type          = "my real variable name"
   geo_latitude      = "my real variable name"
@@ -73,56 +85,165 @@ File : `config.toml`
   # propriété phone doit être unique pour schema.org
   officePhone = "my real variable name"
 
+  # should be a dictionary / array like:
+  # ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
   officeHorairesJours = "my real variable name"
   officeHorairesOpen  = "my real variable name"
   officeHorairesClose = "my real variable name"
 
-  # Used by lodgingbusiness (en plus des champs ci-dessus)
+  priceRange = "my real variable name"
+
+  # used by lodgingbusiness
   checkinTime   = "my real variable name"
   checkoutTime  = "my real variable name"
   numberOfRooms = "my real variable name"
   petsAllowed   = "my real variable name"
+
+  # used by restaurant
+  servesCuisine       = "TODO"
+  acceptsReservations = "TODO"
+  hasMenu             = "TODO"
+
+  # used by vacationrental
+  numberOfBedrooms = "TODO"
+  occupancy        = "TODO"
+  amenityFeature   = "TODO"
+  # numberOfRooms and petsAllowed can be reused from lodgingbusiness
+
+  # used by eventvenue
+  maximumAttendeeCapacity = "TODO"
+  smokingAllowed          = "TODO"
+  # amenityFeature can be reused here too
 ```
 
-### HTML template Usage
+### HTML template usage
 
-Inside your `<head>` section
+Inside your `<head>` section:
 
 ```go-html-template
 {{ partial "seo_metadata.html" . }}
 ```
 
-## Architecture interne (depuis v2.0)
+### Frontmatter examples
 
-| Fichier | Rôle |
+#### Restaurant page
+
+```toml
+typeseo = ["restaurant"]
+```
+
+#### Chalet or room rental page
+
+```toml
+typeseo = ["vacationrental"]
+```
+
+#### Private events / weddings / seminars page
+
+```toml
+typeseo = ["eventvenue"]
+```
+
+#### Multiple types on the same page
+
+```toml
+typeseo = ["localbusiness", "restaurant"]
+```
+
+## Supported types
+
+| `typeseo` value | schema.org type | Typical usage |
+|---|---|---|
+| `localbusiness` | `LocalBusiness` | Main business page |
+| `lodgingbusiness` | `LodgingBusiness` | Hotel / guest house / lodging page |
+| `restaurant` | `Restaurant` | Restaurant or food service page |
+| `vacationrental` | `VacationRental` | Chalet, lodge, rental unit, room rental page |
+| `eventvenue` | `EventVenue` | Weddings, seminars, private events, receptions |
+| `web` | `WebPage` | Base schema generated on all pages |
+
+## Architecture internals
+
+| File | Role |
 |---|---|
-| `seo_metadata.html` | Point d'entrée. Génère le bloc `WebPage` commun à toutes les pages, puis boucle sur `typeseo` (frontmatter ou `site.Params`) pour appeler le partial du type correspondant. |
-| `seo_common_vars.html` | Assemble les variables SEO pour un type donné : combine les valeurs mises en cache (site) et les valeurs dépendantes de la page (`image`). |
-| `seo_common_vars_site.html` | Résout et met en cache (`partialCached`, par langue) les variables invariantes au niveau du site : social, logo, geo, adresse, téléphone, horaires, priceRange. |
-| `seo_find_param.html` | Indirection entre les noms de variables imposés par la lib (ex. `officeAddress`) et les vraies variables du site définies dans `[params.seo_json]`. |
-| `seo_metadata_js_web.html` | Génère le bloc `WebPage` de base, commun à toutes les pages. |
-| `seo_metadata_js_<type>.html` | Un partial par type schema.org (`localbusiness`, `lodgingbusiness`, etc.), construit un `dict` puis appelle `jsonify`. |
-| `seo_metadata_title.html` / `seo_metadata_description.html` | Résolvent le titre et la description SEO avec fallback sur les params du site. |
+| `seo_metadata.html` | Entry point. Always renders the base `WebPage` JSON-LD, then loops over `typeseo` and loads matching partials |
+| `seo_common_vars.html` | Combines shared SEO variables for a page |
+| `seo_common_vars_site.html` | Resolves and caches invariant site-level SEO variables, with multilingual cache isolation |
+| `seo_find_param.html` | Maps generic library field names to the actual site variable names defined in `[params.seo_json]` |
+| `seo_metadata_js_web.html` | Base `WebPage` schema |
+| `seo_metadata_js_localbusiness.html` | `LocalBusiness` schema |
+| `seo_metadata_js_lodgingbusiness.html` | `LodgingBusiness` schema |
+| `seo_metadata_js_restaurant.html` | `Restaurant` schema |
+| `seo_metadata_js_vacationrental.html` | `VacationRental` schema |
+| `seo_metadata_js_eventvenue.html` | `EventVenue` schema |
+| `seo_metadata_title.html` / `seo_metadata_description.html` | Resolve SEO title and description with fallback logic |
 
-### Ajouter un nouveau type schema.org
+## Add a new schema.org type
 
-1. Créer `layouts/partials/seo_metadata_js_<type>.html`.
-2. Récupérer les variables communes :
-`{{- $seo := partial "seo_common_vars.html" . -}}`.
-3. Ajouter les variables spécifiques au type via `seo_find_param.html`, par exemple :
-```go-html-template
-{{- $seo_maVariable := partial "seo_find_param.html" (dict "context" . "var" "maVariable") -}}
+1. Create `layouts/partials/seo_metadata_js_<type>.html`
+2. Reuse common variables:
+   ```go-html-template
+   {{- $seo := partial "seo_common_vars.html" . -}}
    ```
-4. Documenter la nouvelle variable dans `[params.seo_json]` du `config.toml` (section ci-dessus).
-5. Construire le `dict` final (`$mainEntity`, `$root`) et terminer par `{{ jsonify $root }}`.
-6. Déclarer le type dans le frontmatter ou `site.Params` : `typeseo = ["<type>"]`.
+3. Add type-specific variables:
+   ```go-html-template
+   {{- $seo_myVar := partial "seo_find_param.html" (dict "context" . "var" "myVar") -}}
+   ```
+4. Add the mapping in `[params.seo_json]`
+5. Build the final `dict`
+6. Render with:
+   ```go-html-template
+   {{ jsonify $root }}
+   ```
 
-Aucun fichier existant n'a besoin d'être modifié : `seo_metadata.html` détecte automatiquement le nouveau partial via `templates.Exists` et affiche un avertissement de build clair si le fichier est absent ou mal nommé.
+If `typeseo = ["mytype"]` is declared but `seo_metadata_js_mytype.html` does not exist, the build will emit a warning instead of crashing.
 
-### Notes sur le multilingue
+## Multilingual notes
 
-`seo_common_vars_site.html` est mis en cache par langue (`.Language`). Si votre site multilingue définit des adresses, téléphones ou horaires différents par langue (fichiers `config/<lang>/config.toml`), chaque langue conserve sa propre valeur en cache sans conflit.
+`seo_common_vars_site.html` uses `partialCached` with language isolation. This means multilingual sites can define different address, phone or opening hours values per language without cache collisions.
 
-### Credits
+## Notes for the new types
 
-- Copyright © 2020-2026, Didier Divinerites divinerites@gmail.com
+### Restaurant
+
+Recommended use:
+- restaurant overview page
+- menu page
+- dining page for a hotel, chalet or lodge website
+
+Specific fields:
+- `servesCuisine`
+- `acceptsReservations`
+- `hasMenu`
+
+### VacationRental
+
+Recommended use:
+- one page per chalet
+- one page per rental unit
+- one detailed room or suite page when treated like a rental unit
+
+Specific fields:
+- `numberOfRooms`
+- `numberOfBedrooms`
+- `occupancy`
+- `amenityFeature`
+- `petsAllowed`
+
+### EventVenue
+
+Recommended use:
+- weddings page
+- seminars page
+- private hire / receptions page
+- corporate events page
+
+Specific fields:
+- `maximumAttendeeCapacity`
+- `amenityFeature`
+- `smokingAllowed`
+
+`Event` markup is intentionally not included here. It should be added later on dedicated agenda or event detail pages.
+
+## Credits
+
+- Copyright © 2020-2026, Didier Georgieff divinerites@gmail.com
