@@ -1,0 +1,49 @@
+[params]
+
+# Pour SEO ld+json
+# Correspondance entre :
+#   - les varialbles de config.toml (qui changent selon les sites)
+#   - et les variables pour le module SEO qui sont imposées
+# Indiquer les variables de ce site qui correspondent aux besoins
+# NE PAS mettre <site.Params.xxx>, mais uniqueent le <xxx> qui est en dessous
+
+[params.seo_json]
+  # basic used by website
+  social_facebook   = "global.seo.social.facebook"
+  social_twitter    = "global.seo.social.twitter"
+  social_instagram  = "global.seo.social.instagram"
+  image             = "images"
+  defaultKeywords   = "defaultKeywords"
+
+  # Used by localbusiness
+  logo              = "global.logo_home"
+  geo_type          = "global.seo.geo.type"
+  geo_latitude      = "global.seo.geo.latitude"
+  geo_longitude     = "global.seo.geo.longitude"
+
+  officeAddress       = "addresse.addresse"
+  officeAddressVille  = "addresse.ville"
+  officeAddressRegion = "addresse.region"
+  officeAddressCP     = "addresse.cp"
+  officeAddressPays   = "addresse.pays"
+
+  # propriété phone doit être unique pour schema.org
+  officePhone = "global.seo.addresse.phone"
+
+  # should be a dictionnary ex: ["monday","tuesday","wednesday","thursday","friday","saturday"]
+  officeHorairesJours = "global.seo.addresse.horairesJours"
+
+  officeHorairesOpen  = "global.seo.addresse.horairesOpen"
+  officeHorairesClose = "global.seo.addresse.horairesClose"
+
+
+# this an example for officeAddress & al.
+# but you have to adapt to your variable name/organization
+[params.addresse]
+  ### POUR SEO json-ld ###
+  # Informations sur l'addresse
+  addresse = "202, avenue de Colmar (Neudorf-Meinau)"
+  cp = "67100"
+  ville = "Strasbourg"
+  pays = "France"
+  region = "Alsace"

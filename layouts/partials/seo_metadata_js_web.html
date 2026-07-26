@@ -1,0 +1,49 @@
+<!-- Initialisation des variables selon [params.seo_json] de config.toml -->
+<!-- $var = the desired variable for SEO ld+json -->
+{{- $var := "social_facebook" | default "" -}}
+{{- $seo_social_facebook := partial "seo_find_param.html" (dict "context" . "var" $var ) -}}
+{{- $var := "social_twitter" | default "" -}}
+{{- $seo_social_twitter := partial "seo_find_param.html" (dict "context" . "var" $var ) -}}
+{{- $var := "social_instagram" | default "" -}}
+{{- $seo_social_instagram := partial "seo_find_param.html" (dict "context" . "var" $var ) -}}
+{{- $var := "image" | default "" -}}
+{{- $seo_image := partial "seo_find_param.html" (dict "context" . "var" $var ) -}}
+{{- $var := "defaultKeywords" | default "" -}}
+{{- $seo_defaultKeywords := partial "seo_find_param.html" (dict "context" . "var" $var ) -}}
+
+<!--  SEO code for ld-+son -->
+{
+  "@context": "http://schema.org/",
+  "@type": "WebPage",
+  "mainEntityOfPage": {
+    "@type": "WebSite",
+    "@id": "{{ .Permalink }}",
+    "url": "{{ .Permalink }}",
+    "sameAs":
+    {{- if $seo_social_facebook -}}
+    "{{ $seo_social_facebook }}"
+    {{- else if $seo_social_instagram -}}
+    "{{ $seo_social_instagram }}"
+    {{- else if $seo_social_twitter -}}
+    "{{ $seo_social_twitter }}"
+    {{- end }}
+  },
+  "@id": "{{ .Permalink }}",
+  "url": "{{ .Permalink }}",
+  "name" : "{{ partial "seo_metadata_title" . }}",
+  "headline" : "{{ partial "seo_metadata_title" . }}",
+  "description": "{{ partial "seo_metadata_description" . }}",
+  "image": "{{ range first 1 $seo_image }}{{ (resources.Get . | fingerprint "md5").Permalink }}{{ end }}",
+  "inLanguage" : "{{ .Language }}",
+  "copyrightYear" : "{{ now.Format "2006" }}",
+  "datePublished": "{{ now.Format "2006-01-02" }}",
+  {{ if not .Lastmod.IsZero }}"dateModified" : "{{ .Lastmod.Format "2006-01-02" }}"{{ end }}
+  {{- if or .Keywords $seo_defaultKeywords -}}
+  ,
+  {{- end }}
+  {{ if .Keywords }}
+  "keywords" : "{{ delimit .Keywords ", " }}"
+  {{- else if $seo_defaultKeywords -}}
+  "keywords" : "{{ delimit $seo_defaultKeywords ", " }}"
+  {{ end -}}
+}

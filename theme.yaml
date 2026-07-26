@@ -1,0 +1,20 @@
+# theme.yaml configuration file
+
+name: Manage easily schema.org structured data
+license: GPLv3
+licenselink:
+description: Manage easily seo structured data
+homepage:
+tags:
+  - component
+  - seo
+  - schema.org
+features:
+  - Manage easily schema.org structured data
+  - Version v1.1 - 12 juillet 2020
+  - Ajoute js_campground SPECIFIQUE
+  - Version 1.2 - 22 juillet - Tout en Asset
+min_version: 0.70.0
+
+author:
+  name: Didier Georgieff

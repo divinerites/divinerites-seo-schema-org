@@ -1,0 +1,8 @@
+<!-- Manage SEO ld+json
+     Return the "real" param corresponding to the given variable -->
+{{ $var := .var }}
+
+{{ $temp := .context.Param ( printf "seo_json.%s" $var) }}
+{{ $param_var := .context.Param $temp }}
+
+{{ return $param_var }}
