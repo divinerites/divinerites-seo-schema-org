@@ -1,0 +1,54 @@
+{{- /*
+  Partial commun : récupère toutes les variables SEO partagées entre les
+  types schema.org (LocalBusiness, LodgingBusiness, etc.) via seo_find_param.html.
+  Retourne un dict réutilisable par les partials seo_metadata_js_*.html
+  afin d'éviter la duplication du bloc d'initialisation dans chaque type.
+*/ -}}
+{{- $context := . -}}
+{{- $find := "seo_find_param.html" -}}
+
+{{- /* var the desired variable for SEO ldjson */ -}}
+{{- $social_facebook   := partial $find (dict "context" $context "var" "social_facebook") -}}
+{{- $social_twitter    := partial $find (dict "context" $context "var" "social_twitter") -}}
+{{- $social_instagram  := partial $find (dict "context" $context "var" "social_instagram") -}}
+{{- $image             := partial $find (dict "context" $context "var" "image") -}}
+{{- $defaultKeywords   := partial $find (dict "context" $context "var" "defaultKeywords") -}}
+{{- $logo              := partial $find (dict "context" $context "var" "logo") -}}
+{{- $geo_type          := partial $find (dict "context" $context "var" "geo_type") -}}
+{{- $geo_latitude      := partial $find (dict "context" $context "var" "geo_latitude") -}}
+{{- $geo_longitude     := partial $find (dict "context" $context "var" "geo_longitude") -}}
+
+{{- $officeAddressName   := partial $find (dict "context" $context "var" "officeAddressName") -}}
+{{- $officeAddress       := partial $find (dict "context" $context "var" "officeAddress") -}}
+{{- $officeAddressCP     := partial $find (dict "context" $context "var" "officeAddressCP") -}}
+{{- $officeAddressVille  := partial $find (dict "context" $context "var" "officeAddressVille") -}}
+{{- $officeAddressPays   := partial $find (dict "context" $context "var" "officeAddressPays") -}}
+{{- $officeAddressRegion := partial $find (dict "context" $context "var" "officeAddressRegion") -}}
+{{- $officePhone         := partial $find (dict "context" $context "var" "officePhone") -}}
+{{- $officeHorairesJours := partial $find (dict "context" $context "var" "officeHorairesJours") -}}
+{{- $officeHorairesOpen  := partial $find (dict "context" $context "var" "officeHorairesOpen") -}}
+{{- $officeHorairesClose := partial $find (dict "context" $context "var" "officeHorairesClose") -}}
+{{- $priceRange          := partial $find (dict "context" $context "var" "priceRange") -}}
+
+{{- return dict
+  "social_facebook"      $social_facebook
+  "social_twitter"       $social_twitter
+  "social_instagram"     $social_instagram
+  "image"                $image
+  "defaultKeywords"      $defaultKeywords
+  "logo"                 $logo
+  "geo_type"             $geo_type
+  "geo_latitude"         $geo_latitude
+  "geo_longitude"        $geo_longitude
+  "officeAddressName"    $officeAddressName
+  "officeAddress"        $officeAddress
+  "officeAddressCP"      $officeAddressCP
+  "officeAddressVille"   $officeAddressVille
+  "officeAddressPays"    $officeAddressPays
+  "officeAddressRegion"  $officeAddressRegion
+  "officePhone"          $officePhone
+  "officeHorairesJours"  $officeHorairesJours
+  "officeHorairesOpen"   $officeHorairesOpen
+  "officeHorairesClose"  $officeHorairesClose
+  "priceRange"           $priceRange
+-}}
