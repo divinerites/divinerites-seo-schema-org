@@ -4,6 +4,24 @@
 
 Put schema.org on Web pages and LocalBusiness based on local variables from config.toml
 
+## Changelog
+
+### v2.0 - 26 juillet 2026
+
+- **Performance** : les variables SEO invariantes (social, logo, geo, adresse, téléphone, horaires, priceRange) sont désormais mises en cache via `partialCached`, ventilé par langue pour les sites multilingues.
+- **Robustesse** : le JSON-LD est généré via `jsonify` sur un `dict` Go-template plutôt que par concaténation manuelle de texte, ce qui évite un JSON invalide si une valeur contient un guillemet ou un caractère spécial.
+- **Simplification** : le bloc d'initialisation des variables communes (partagé entre `LocalBusiness`, `LodgingBusiness`, etc.) est factorisé dans `seo_common_vars.html`, réduisant la duplication pour l'ajout de futurs types.
+- **Fiabilité du build** : un `typeseo` sans partial correspondant ne fait plus planter le build ; un avertissement explicite est émis à la place (`templates.Exists`).
+- Le calcul du fingerprint de l'image principale n'est plus dupliqué entre les champs `image` et `photo`.
+
+### v1.2 - 22 juillet 2020
+
+- Tout en Asset
+
+### v1.1 - 12 juillet 2020
+
+- Ajoute js_campground SPECIFIQUE
+
 ## Usage
 
 1 - You have to give the correspondance for all those `params.seo_json` fields.

@@ -6,15 +6,20 @@ licenselink:
 description: Manage easily seo structured data
 homepage:
 tags:
-  - component
-  - seo
-  - schema.org
+- component
+- seo
+- schema.org
 features:
-  - Manage easily schema.org structured data
-  - Version v1.1 - 12 juillet 2020
-  - Ajoute js_campground SPECIFIQUE
-  - Version 1.2 - 22 juillet - Tout en Asset
+- Manage easily schema.org structured data
+- Version v1.1 - 12 juillet 2020
+- Ajoute js_campground SPECIFIQUE
+- Version 1.2 - 22 juillet - Tout en Asset
+- Version 2.0 - 26 juillet 2026 - Refactoring performance et robustesse
+- Factorisation des variables communes entre types schema.org
+- Génération JSON-LD via jsonify (au lieu de concaténation manuelle)
+- Mise en cache des variables SEO invariantes (partialCached, multilingue)
+- Garde-fou templates.Exists sur les typeseo non implémentés
 min_version: 0.70.0
 
 author:
-  name: Didier Georgieff
+name: Didier Divinerites
