@@ -1,54 +1,36 @@
 {{- /*
-  Partial commun : récupère toutes les variables SEO partagées entre les
-  types schema.org (LocalBusiness, LodgingBusiness, etc.) via seo_find_param.html.
-  Retourne un dict réutilisable par les partials seo_metadata_js_*.html
-  afin d'éviter la duplication du bloc d'initialisation dans chaque type.
+  Partial commun : combine les valeurs SEO mises en cache au niveau site
+  (seo_common_vars_site.html) avec les valeurs dépendantes de la page
+  courante (image), résolues via seo_find_param.html.
 */ -}}
 {{- $context := . -}}
 {{- $find := "seo_find_param.html" -}}
 
-{{- /* var the desired variable for SEO ldjson */ -}}
-{{- $social_facebook   := partial $find (dict "context" $context "var" "social_facebook") -}}
-{{- $social_twitter    := partial $find (dict "context" $context "var" "social_twitter") -}}
-{{- $social_instagram  := partial $find (dict "context" $context "var" "social_instagram") -}}
-{{- $image             := partial $find (dict "context" $context "var" "image") -}}
-{{- $defaultKeywords   := partial $find (dict "context" $context "var" "defaultKeywords") -}}
-{{- $logo              := partial $find (dict "context" $context "var" "logo") -}}
-{{- $geo_type          := partial $find (dict "context" $context "var" "geo_type") -}}
-{{- $geo_latitude      := partial $find (dict "context" $context "var" "geo_latitude") -}}
-{{- $geo_longitude     := partial $find (dict "context" $context "var" "geo_longitude") -}}
+{{- /* Valeurs invariantes : une seule évaluation pour tout le site */ -}}
+{{- $site := partialCached "seo_common_vars_site.html" $context "seo_common_vars_site" -}}
 
-{{- $officeAddressName   := partial $find (dict "context" $context "var" "officeAddressName") -}}
-{{- $officeAddress       := partial $find (dict "context" $context "var" "officeAddress") -}}
-{{- $officeAddressCP     := partial $find (dict "context" $context "var" "officeAddressCP") -}}
-{{- $officeAddressVille  := partial $find (dict "context" $context "var" "officeAddressVille") -}}
-{{- $officeAddressPays   := partial $find (dict "context" $context "var" "officeAddressPays") -}}
-{{- $officeAddressRegion := partial $find (dict "context" $context "var" "officeAddressRegion") -}}
-{{- $officePhone         := partial $find (dict "context" $context "var" "officePhone") -}}
-{{- $officeHorairesJours := partial $find (dict "context" $context "var" "officeHorairesJours") -}}
-{{- $officeHorairesOpen  := partial $find (dict "context" $context "var" "officeHorairesOpen") -}}
-{{- $officeHorairesClose := partial $find (dict "context" $context "var" "officeHorairesClose") -}}
-{{- $priceRange          := partial $find (dict "context" $context "var" "priceRange") -}}
+{{- /* Valeur dépendante de la page courante : pas de cache possible ici */ -}}
+{{- $image := partial $find (dict "context" $context "var" "image") -}}
 
 {{- return dict
-  "social_facebook"      $social_facebook
-  "social_twitter"       $social_twitter
-  "social_instagram"     $social_instagram
+  "social_facebook"      $site.social_facebook
+  "social_twitter"       $site.social_twitter
+  "social_instagram"     $site.social_instagram
   "image"                $image
-  "defaultKeywords"      $defaultKeywords
-  "logo"                 $logo
-  "geo_type"             $geo_type
-  "geo_latitude"         $geo_latitude
-  "geo_longitude"        $geo_longitude
-  "officeAddressName"    $officeAddressName
-  "officeAddress"        $officeAddress
-  "officeAddressCP"      $officeAddressCP
-  "officeAddressVille"   $officeAddressVille
-  "officeAddressPays"    $officeAddressPays
-  "officeAddressRegion"  $officeAddressRegion
-  "officePhone"          $officePhone
-  "officeHorairesJours"  $officeHorairesJours
-  "officeHorairesOpen"   $officeHorairesOpen
-  "officeHorairesClose"  $officeHorairesClose
-  "priceRange"           $priceRange
+  "defaultKeywords"      $site.defaultKeywords
+  "logo"                 $site.logo
+  "geo_type"             $site.geo_type
+  "geo_latitude"         $site.geo_latitude
+  "geo_longitude"        $site.geo_longitude
+  "officeAddressName"    $site.officeAddressName
+  "officeAddress"        $site.officeAddress
+  "officeAddressCP"      $site.officeAddressCP
+  "officeAddressVille"   $site.officeAddressVille
+  "officeAddressPays"    $site.officeAddressPays
+  "officeAddressRegion"  $site.officeAddressRegion
+  "officePhone"          $site.officePhone
+  "officeHorairesJours"  $site.officeHorairesJours
+  "officeHorairesOpen"   $site.officeHorairesOpen
+  "officeHorairesClose"  $site.officeHorairesClose
+  "priceRange"           $site.priceRange
 -}}
