@@ -2,12 +2,14 @@
   Partial commun : combine les valeurs SEO mises en cache au niveau site
   (seo_common_vars_site.html) avec les valeurs dépendantes de la page
   courante (image), résolues via seo_find_param.html.
+  Le cache est ventilé par langue (.Language) pour les sites multilingues,
+  au cas où les params de config.toml diffèrent selon la langue.
 */ -}}
 {{- $context := . -}}
 {{- $find := "seo_find_param.html" -}}
 
-{{- /* Valeurs invariantes : une seule évaluation pour tout le site */ -}}
-{{- $site := partialCached "seo_common_vars_site.html" $context "seo_common_vars_site" -}}
+{{- /* Valeurs invariantes par langue : une seule évaluation par langue du site */ -}}
+{{- $site := partialCached "seo_common_vars_site.html" $context "seo_common_vars_site" $context.Language -}}
 
 {{- /* Valeur dépendante de la page courante : pas de cache possible ici */ -}}
 {{- $image := partial $find (dict "context" $context "var" "image") -}}
