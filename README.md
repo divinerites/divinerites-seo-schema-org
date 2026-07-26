@@ -76,6 +76,12 @@ File : `config.toml`
   officeHorairesJours = "my real variable name"
   officeHorairesOpen  = "my real variable name"
   officeHorairesClose = "my real variable name"
+
+  # Used by lodgingbusiness (en plus des champs ci-dessus)
+  checkinTime   = "my real variable name"
+  checkoutTime  = "my real variable name"
+  numberOfRooms = "my real variable name"
+  petsAllowed   = "my real variable name"
 ```
 
 ### HTML template Usage
@@ -83,9 +89,40 @@ File : `config.toml`
 Inside your `<head>` section
 
 ```go-html-template
-	{{ partial "seo_metadata.html" . }}
+{{ partial "seo_metadata.html" . }}
 ```
+
+## Architecture interne (depuis v2.0)
+
+| Fichier | Rôle |
+|---|---|
+| `seo_metadata.html` | Point d'entrée. Génère le bloc `WebPage` commun à toutes les pages, puis boucle sur `typeseo` (frontmatter ou `site.Params`) pour appeler le partial du type correspondant. |
+| `seo_common_vars.html` | Assemble les variables SEO pour un type donné : combine les valeurs mises en cache (site) et les valeurs dépendantes de la page (`image`). |
+| `seo_common_vars_site.html` | Résout et met en cache (`partialCached`, par langue) les variables invariantes au niveau du site : social, logo, geo, adresse, téléphone, horaires, priceRange. |
+| `seo_find_param.html` | Indirection entre les noms de variables imposés par la lib (ex. `officeAddress`) et les vraies variables du site définies dans `[params.seo_json]`. |
+| `seo_metadata_js_web.html` | Génère le bloc `WebPage` de base, commun à toutes les pages. |
+| `seo_metadata_js_<type>.html` | Un partial par type schema.org (`localbusiness`, `lodgingbusiness`, etc.), construit un `dict` puis appelle `jsonify`. |
+| `seo_metadata_title.html` / `seo_metadata_description.html` | Résolvent le titre et la description SEO avec fallback sur les params du site. |
+
+### Ajouter un nouveau type schema.org
+
+1. Créer `layouts/partials/seo_metadata_js_<type>.html`.
+2. Récupérer les variables communes :
+`{{- $seo := partial "seo_common_vars.html" . -}}`.
+3. Ajouter les variables spécifiques au type via `seo_find_param.html`, par exemple :
+```go-html-template
+{{- $seo_maVariable := partial "seo_find_param.html" (dict "context" . "var" "maVariable") -}}
+   ```
+4. Documenter la nouvelle variable dans `[params.seo_json]` du `config.toml` (section ci-dessus).
+5. Construire le `dict` final (`$mainEntity`, `$root`) et terminer par `{{ jsonify $root }}`.
+6. Déclarer le type dans le frontmatter ou `site.Params` : `typeseo = ["<type>"]`.
+
+Aucun fichier existant n'a besoin d'être modifié : `seo_metadata.html` détecte automatiquement le nouveau partial via `templates.Exists` et affiche un avertissement de build clair si le fichier est absent ou mal nommé.
+
+### Notes sur le multilingue
+
+`seo_common_vars_site.html` est mis en cache par langue (`.Language`). Si votre site multilingue définit des adresses, téléphones ou horaires différents par langue (fichiers `config/<lang>/config.toml`), chaque langue conserve sa propre valeur en cache sans conflit.
 
 ### Credits
 
-- Copyright © 2020 onwards, Didier Georgieff divinerites@gmail.com
+- Copyright © 2020-2026, Didier Divinerites divinerites@gmail.com
