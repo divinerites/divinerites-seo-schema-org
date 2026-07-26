@@ -1,28 +1,21 @@
-<!-- Gestion du type @web sur toutes les pages -->
-{{- $var := "seo_metadata_js_web.html" }}
-{{ "<!-- schema.org : Web -->" | safeHTML }}
+{{- /* Gestion du type Web sur toutes les pages */ -}}
+{{- $webVar := "seo_metadata_js_web.html" -}}
+{{- /* schema.org WebPage */ -}}
 <script type="application/ld+json">
-  {{- partial $var . | safeJS -}}
+{{ partial $webVar . | safeJS }}
 </script>
 
-<!-- Gestion du partial selon existence de ".typeseo" dans la page -->
-{{- $context := . }}
-{{- if .IsHome }}
-  <!-- HOME PAGE -->
-    {{- range site.Params.typeseo }}
-      {{- $var = (printf "seo_metadata_js_%s.html" . ) }}
-      {{- $infoschema := (printf "<!-- schema.org : %s -->" . ) }}
-      {{- $infoschema | safeHTML }}
-      <script type="application/ld+json">
-        {{- partial $var $context | safeJS -}}
-      </script>
-    {{- end }}
-{{- else -}}
-  <!-- AUTRES PAGES -->
-    {{- range .Params.typeseo }}
-      {{- $var = (printf "seo_metadata_js_%s.html" . ) -}}
-      <script type="application/ld+json">
-        {{- partial $var $context | safeJS -}}
-      </script>
-    {{- end }}
-{{- end }}
+{{- /* Sélection de la source typeseo : site.Params sur la home, .Params sinon */ -}}
+{{- $context := . -}}
+{{- $typeseo := .Params.typeseo -}}
+{{- if .IsHome -}}
+  {{- $typeseo = site.Params.typeseo -}}
+{{- end -}}
+
+{{- /* Génération d'un bloc JSON-LD par type déclaré dans typeseo */ -}}
+{{- range $typeseo -}}
+  {{- $var := printf "seo_metadata_js_%s.html" . -}}
+  <script type="application/ld+json">
+  {{ partial $var $context | safeJS }}
+  </script>
+{{- end -}}
