@@ -17,8 +17,13 @@
 {{- range $typeseo -}}
   {{- $var := printf "seo_metadata_js_%s.html" . -}}
   {{- $infoschema := printf "<!-- schema.org %s -->" . -}}
-  {{ $infoschema | safeHTML }}
-  <script type="application/ld+json">
-  {{ partial $var $context | safeJS }}
-  </script>
+  {{- $partialPath := printf "partials/%s" $var -}}
+  {{- if templates.Exists $partialPath -}}
+    {{ $infoschema | safeHTML }}
+    <script type="application/ld+json">
+    {{ partial $var $context | safeJS }}
+    </script>
+  {{- else -}}
+    {{- warnf "seo-schema-org: aucun partial trouvé pour typeseo %q (attendu: layouts/partials/%s) sur %s" . $var $context.Permalink -}}
+  {{- end -}}
 {{- end -}}
