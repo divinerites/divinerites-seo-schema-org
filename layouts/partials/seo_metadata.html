@@ -1,21 +1,30 @@
 {{- /* Gestion du type Web sur toutes les pages */ -}}
-{{- $webVar := "seo_metadata_js_web.html" -}}
-{{- /* schema.org WebPage */ -}}
+{{- $var := "seo_metadata_js_web.html" -}}
+{{- /* schema.org Web */ -}}
 <script type="application/ld+json">
-{{ partial $webVar . | safeJS }}
+{{ partial $var . | safeJS }}
 </script>
 
-{{- /* Sélection de la source typeseo : site.Params sur la home, .Params sinon */ -}}
+{{- /* Gestion du partial selon existence de .typeseo dans la page */ -}}
 {{- $context := . -}}
-{{- $typeseo := .Params.typeseo -}}
 {{- if .IsHome -}}
-  {{- $typeseo = site.Params.typeseo -}}
-{{- end -}}
-
-{{- /* Génération d'un bloc JSON-LD par type déclaré dans typeseo */ -}}
-{{- range $typeseo -}}
-  {{- $var := printf "seo_metadata_js_%s.html" . -}}
-  <script type="application/ld+json">
-  {{ partial $var $context | safeJS }}
-  </script>
+  {{- /* HOME PAGE */ -}}
+  {{- range site.Params.typeseo -}}
+    {{- $var := printf "seo_metadata_js_%s.html" . -}}
+    {{- $infoschema := printf "<!-- schema.org %s -->" . -}}
+    {{ $infoschema | safeHTML }}
+    <script type="application/ld+json">
+    {{ partial $var $context | safeJS }}
+    </script>
+  {{- end -}}
+{{- else -}}
+  {{- /* AUTRES PAGES */ -}}
+  {{- range .Params.typeseo -}}
+    {{- $var := printf "seo_metadata_js_%s.html" . -}}
+    {{- $infoschema := printf "<!-- schema.org %s -->" . -}}
+    {{ $infoschema | safeHTML }}
+    <script type="application/ld+json">
+    {{ partial $var $context | safeJS }}
+    </script>
+  {{- end -}}
 {{- end -}}
