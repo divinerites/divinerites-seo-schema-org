@@ -1,0 +1,100 @@
+{{- /* Initialisation des variables communes via le partial partagé */ -}}
+{{- $seo := partial "seo_common_vars.html" . -}}
+
+{{- /* Variables spécifiques à LodgingBusiness (non couvertes par le partial commun) */ -}}
+{{- $seo_checkinTime   := partial "seo_find_param.html" (dict "context" . "var" "checkinTime") -}}
+{{- $seo_checkoutTime  := partial "seo_find_param.html" (dict "context" . "var" "checkoutTime") -}}
+{{- $seo_numberOfRooms := partial "seo_find_param.html" (dict "context" . "var" "numberOfRooms") -}}
+{{- $seo_petsAllowed   := partial "seo_find_param.html" (dict "context" . "var" "petsAllowed") -}}
+
+{{- /* Résolution du sameAs (priorité facebook > instagram > twitter) */ -}}
+{{- $sameAs := "" -}}
+{{- if $seo.social_facebook -}}
+  {{- $sameAs = $seo.social_facebook -}}
+{{- else if $seo.social_instagram -}}
+  {{- $sameAs = $seo.social_instagram -}}
+{{- else if $seo.social_twitter -}}
+  {{- $sameAs = $seo.social_twitter -}}
+{{- end -}}
+
+{{- /* Image unique fingerprintée, calculée une seule fois et réutilisée (image + photo) */ -}}
+{{- $imageURL := "" -}}
+{{- range first 1 $seo.image -}}
+  {{- $imageURL = (resources.Get . | fingerprint "md5").Permalink -}}
+{{- end -}}
+
+{{- $logoURL := "" -}}
+{{- if $seo.logo -}}
+  {{- $logoURL = (resources.Get $seo.logo | fingerprint "md5").Permalink -}}
+{{- end -}}
+
+{{- /* Construction du sous-objet mainEntity (LodgingBusiness) */ -}}
+{{- $mainEntity := dict
+  "@type"        "LodgingBusiness"
+  "@id"          .Permalink
+  "url"          .Permalink
+  "name"         (partial "seo_metadata_title" .)
+  "description"  (partial "seo_metadata_description" .)
+  "image"        $imageURL
+  "photo"        $imageURL
+  "logo"         $logoURL
+  "address" (dict
+    "@type"           "PostalAddress"
+    "streetAddress"   $seo.officeAddress
+    "addressLocality" $seo.officeAddressVille
+    "addressRegion"   $seo.officeAddressRegion
+    "postalCode"      $seo.officeAddressCP
+    "addressCountry"  $seo.officeAddressPays
+  )
+  "telephone"  ($seo.officePhone | safeHTML)
+  "priceRange" $seo.priceRange
+  "geo" (dict
+    "@type"     $seo.geo_type
+    "latitude"  $seo.geo_latitude
+    "longitude" $seo.geo_longitude
+  )
+  "openingHoursSpecification" (dict
+    "@type"    "OpeningHoursSpecification"
+    "dayOfWeek" $seo.officeHorairesJours
+    "opens"    $seo.officeHorairesOpen
+    "closes"   $seo.officeHorairesClose
+  )
+  "checkinTime"   ($seo_checkinTime | safeHTML)
+  "checkoutTime"  ($seo_checkoutTime | safeHTML)
+  "numberOfRooms" ($seo_numberOfRooms | safeHTML)
+  "petsAllowed"   ($seo_petsAllowed | safeHTML)
+-}}
+
+{{- /* Construction de l'objet racine (WebPage) */ -}}
+{{- $root := dict
+  "@context" "http://schema.org/"
+  "@type"    "WebPage"
+  "mainEntityOfPage" (dict
+    "@type"   "WebSite"
+    "@id"     .Permalink
+    "url"     .Permalink
+    "sameAs"  $sameAs
+  )
+  "@id"            .Permalink
+  "url"            .Permalink
+  "name"           (partial "seo_metadata_title" .)
+  "headline"       (partial "seo_metadata_title" .)
+  "description"    (partial "seo_metadata_description" .)
+  "image"          $imageURL
+  "inLanguage"     .Language
+  "copyrightYear"  (now.Format "2006")
+  "datePublished"  (now.Format "2006-01-02")
+  "mainEntity"     $mainEntity
+-}}
+
+{{- if not .Lastmod.IsZero -}}
+  {{- $root = merge $root (dict "dateModified" (.Lastmod.Format "2006-01-02")) -}}
+{{- end -}}
+
+{{- if .Keywords -}}
+  {{- $root = merge $root (dict "keywords" (delimit .Keywords ", ")) -}}
+{{- else if $seo.defaultKeywords -}}
+  {{- $root = merge $root (dict "keywords" (delimit $seo.defaultKeywords ", ")) -}}
+{{- end -}}
+
+{{ jsonify $root }}

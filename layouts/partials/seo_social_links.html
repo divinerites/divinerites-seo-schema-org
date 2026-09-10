@@ -1,0 +1,5 @@
+{{- $links := slice -}}
+{{- range (slice .social_facebook .social_instagram .social_twitter) -}}
+  {{- range (partial "seo_normalize_slice.html" .) }}{{ with . }}{{ $links = $links | append . }}{{ end }}{{ end -}}
+{{- end -}}
+{{- return $links -}}

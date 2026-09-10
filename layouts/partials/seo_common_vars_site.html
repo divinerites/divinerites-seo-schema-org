@@ -22,10 +22,17 @@
 {{- $officeAddressPays   := partial $find (dict "context" $context "var" "officeAddressPays") -}}
 {{- $officeAddressRegion := partial $find (dict "context" $context "var" "officeAddressRegion") -}}
 {{- $officePhone         := partial $find (dict "context" $context "var" "officePhone") -}}
+{{- $officePhones        := partial $find (dict "context" $context "var" "officePhones") -}}
 {{- $officeHorairesJours := partial $find (dict "context" $context "var" "officeHorairesJours") -}}
 {{- $officeHorairesOpen  := partial $find (dict "context" $context "var" "officeHorairesOpen") -}}
 {{- $officeHorairesClose := partial $find (dict "context" $context "var" "officeHorairesClose") -}}
+{{- $officeHorairesJoursWE := partial $find (dict "context" $context "var" "officeHorairesJoursWE") -}}
+{{- $officeHorairesOpenWE  := partial $find (dict "context" $context "var" "officeHorairesOpenWE") -}}
+{{- $officeHorairesCloseWE := partial $find (dict "context" $context "var" "officeHorairesCloseWE") -}}
 {{- $priceRange          := partial $find (dict "context" $context "var" "priceRange") -}}
+{{- $personName          := partial $find (dict "context" $context "var" "personName") -}}
+{{- $personJobTitle      := partial $find (dict "context" $context "var" "personJobTitle") -}}
+{{- $personImage         := partial $find (dict "context" $context "var" "personImage") -}}
 
 {{- return dict
   "social_facebook"      $social_facebook
@@ -43,8 +50,15 @@
   "officeAddressPays"    $officeAddressPays
   "officeAddressRegion"  $officeAddressRegion
   "officePhone"          $officePhone
+  "officePhones"         $officePhones
   "officeHorairesJours"  $officeHorairesJours
   "officeHorairesOpen"   $officeHorairesOpen
   "officeHorairesClose"  $officeHorairesClose
+  "officeHorairesJoursWE" $officeHorairesJoursWE
+  "officeHorairesOpenWE"  $officeHorairesOpenWE
+  "officeHorairesCloseWE" $officeHorairesCloseWE
   "priceRange"           $priceRange
+  "personName"           $personName
+  "personJobTitle"       $personJobTitle
+  "personImage"          $personImage
 -}}

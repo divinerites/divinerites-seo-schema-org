@@ -10,6 +10,16 @@ This library keeps a generic mapping layer between:
 
 ## Changelog
 
+### v3.0.0 - 10 septembre 2026
+
+- Generate one JSON-LD script and one `@graph` per page
+- Link `WebSite`, `WebPage`, business entities, optional `Person`, and optional `BreadcrumbList` with stable `@id` values
+- Accept `typeseo` as either a string or an array
+- Use the page publication and modification dates instead of build time
+- Support multiple phone numbers, separate weekday/weekend opening hours, and optional `priceRange`
+- Treat unmapped optional fields as absent instead of failing the Hugo build
+- Breaking change for custom `seo_metadata_js_<type>.html` partials: they must return an entity `dict`; the entry point owns JSON serialization
+
 ### v2.1 - 26 juillet 2026
 
 - Add support for `Restaurant`
@@ -35,9 +45,9 @@ This library keeps a generic mapping layer between:
 
 ## Usage
 
-1 - Define the mapping for all required `params.seo_json` fields.
-2 - If you want specific schema.org markup on a page, add `typeseo = ["localbusiness", "restaurant", "vacationrental", "eventvenue", "whatever type"]` in Params and/or frontmatter.
-3 - The library will automatically load the matching partial `seo_metadata_js_<type>.html`.
+1 - Define the mapping for the relevant `params.seo_json` fields.
+2 - Add `typeseo = "localbusiness"` or `typeseo = ["localbusiness", "restaurant"]` in Params and/or front matter.
+3 - The library loads each matching `seo_metadata_js_<type>.html` partial and includes its entity in the page graph.
 
 Example:
 
@@ -48,6 +58,9 @@ Example:
   officeAddressRegion = "addresse.region"
   officeAddressCP     = "addresse.cp"
   officeAddressPays   = "addresse.pays"
+
+[params.seo_schema]
+  breadcrumb = true
 
 [params.addresse]
   addresse = "202, avenue de Colmar (Neudorf-Meinau)"
@@ -77,21 +90,31 @@ File: `config.toml`
   geo_longitude     = "my real variable name"
 
   officeAddress       = "my real variable name"
+  officeAddressName   = "my real variable name"
   officeAddressVille  = "my real variable name"
   officeAddressRegion = "my real variable name"
   officeAddressCP     = "my real variable name"
   officeAddressPays   = "my real variable name"
 
-  # propriété phone doit être unique pour schema.org
+  # officePhones takes precedence; officePhone remains supported.
   officePhone = "my real variable name"
+  officePhones = "my real variable name"
 
   # should be a dictionary / array like:
   # ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
   officeHorairesJours = "my real variable name"
   officeHorairesOpen  = "my real variable name"
   officeHorairesClose = "my real variable name"
+  officeHorairesJoursWE = "my real variable name"
+  officeHorairesOpenWE  = "my real variable name"
+  officeHorairesCloseWE = "my real variable name"
 
   priceRange = "my real variable name"
+
+  # optional Person entity
+  personName     = "my real variable name"
+  personJobTitle = "my real variable name"
+  personImage    = "my real variable name"
 
   # used by lodgingbusiness
   checkinTime   = "my real variable name"
@@ -161,15 +184,21 @@ typeseo = ["localbusiness", "restaurant"]
 | `eventvenue` | `EventVenue` | Weddings, seminars, private events, receptions |
 | `web` | `WebPage` | Base schema generated on all pages |
 
+`WebSite` and `WebPage` are always generated. The `web` value is accepted for
+backward compatibility but is not required. Set
+`params.seo_schema.breadcrumb = true` to add a `BreadcrumbList` to non-home
+pages. A `Person` is added when `personName` resolves to a non-empty value.
+
 ## Architecture internals
 
 | File | Role |
 |---|---|
-| `seo_metadata.html` | Entry point. Always renders the base `WebPage` JSON-LD, then loops over `typeseo` and loads matching partials |
+| `seo_metadata.html` | Entry point. Builds and serializes the single JSON-LD `@graph` |
 | `seo_common_vars.html` | Combines shared SEO variables for a page |
 | `seo_common_vars_site.html` | Resolves and caches invariant site-level SEO variables, with multilingual cache isolation |
 | `seo_find_param.html` | Maps generic library field names to the actual site variable names defined in `[params.seo_json]` |
-| `seo_metadata_js_web.html` | Base `WebPage` schema |
+| `seo_metadata_js_website.html` / `seo_metadata_js_web.html` | Base `WebSite` and `WebPage` entities |
+| `seo_metadata_js_person.html` / `seo_metadata_js_breadcrumb.html` | Optional `Person` and `BreadcrumbList` entities |
 | `seo_metadata_js_localbusiness.html` | `LocalBusiness` schema |
 | `seo_metadata_js_lodgingbusiness.html` | `LodgingBusiness` schema |
 | `seo_metadata_js_restaurant.html` | `Restaurant` schema |
@@ -189,11 +218,13 @@ typeseo = ["localbusiness", "restaurant"]
    {{- $seo_myVar := partial "seo_find_param.html" (dict "context" . "var" "myVar") -}}
    ```
 4. Add the mapping in `[params.seo_json]`
-5. Build the final `dict`
-6. Render with:
+5. Return the entity `dict`:
    ```go-html-template
-   {{ jsonify $root }}
+   {{ return $entity }}
    ```
+
+Do not serialize the custom entity. `seo_metadata.html` serializes the complete
+graph once.
 
 If `typeseo = ["mytype"]` is declared but `seo_metadata_js_mytype.html` does not exist, the build will emit a warning instead of crashing.
 

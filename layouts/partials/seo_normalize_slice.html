@@ -1,0 +1,9 @@
+{{- $values := slice -}}
+{{- with . -}}
+  {{- if reflect.IsSlice . -}}
+    {{- range . }}{{ with . }}{{ $values = $values | append . }}{{ end }}{{ end -}}
+  {{- else -}}
+    {{- $values = $values | append . -}}
+  {{- end -}}
+{{- end -}}
+{{- return $values -}}

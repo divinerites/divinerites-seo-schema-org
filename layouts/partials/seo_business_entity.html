@@ -1,0 +1,61 @@
+{{- $context := .context -}}
+{{- $seo := .seo -}}
+{{- $entity := dict
+  "@type" .type
+  "@id" .id
+  "url" .url
+  "name" (partial "seo_metadata_title" $context)
+  "description" (partial "seo_metadata_description" $context)
+-}}
+
+{{- $imageURL := partial "seo_primary_image.html" (dict "context" $context "images" $seo.image) -}}
+{{- with $imageURL }}{{ $entity = merge $entity (dict "image" . "photo" .) }}{{ end -}}
+{{- with $seo.logo -}}
+  {{- with resources.Get . }}{{ $entity = merge $entity (dict "logo" (. | fingerprint "md5").Permalink) }}{{ end -}}
+{{- end -}}
+
+{{- if or $seo.officeAddress $seo.officeAddressVille $seo.officeAddressCP $seo.officeAddressPays -}}
+  {{- $address := dict "@type" "PostalAddress" -}}
+  {{- with $seo.officeAddress }}{{ $address = merge $address (dict "streetAddress" .) }}{{ end -}}
+  {{- with $seo.officeAddressVille }}{{ $address = merge $address (dict "addressLocality" .) }}{{ end -}}
+  {{- with $seo.officeAddressRegion }}{{ $address = merge $address (dict "addressRegion" .) }}{{ end -}}
+  {{- with $seo.officeAddressCP }}{{ $address = merge $address (dict "postalCode" (printf "%v" .)) }}{{ end -}}
+  {{- with $seo.officeAddressPays }}{{ $address = merge $address (dict "addressCountry" .) }}{{ end -}}
+  {{- $entity = merge $entity (dict "address" $address) -}}
+{{- end -}}
+
+{{- if and $seo.geo_latitude $seo.geo_longitude -}}
+  {{- $entity = merge $entity (dict "geo" (dict
+    "@type" ($seo.geo_type | default "GeoCoordinates")
+    "latitude" $seo.geo_latitude
+    "longitude" $seo.geo_longitude
+  )) -}}
+{{- end -}}
+
+{{- $phones := partial "seo_normalize_slice.html" $seo.officePhones -}}
+{{- if eq (len $phones) 0 }}{{ $phones = partial "seo_normalize_slice.html" $seo.officePhone }}{{ end -}}
+{{- with $phones }}{{ $entity = merge $entity (dict "telephone" .) }}{{ end -}}
+{{- with $seo.priceRange }}{{ $entity = merge $entity (dict "priceRange" .) }}{{ end -}}
+{{- $sameAs := partial "seo_social_links.html" $seo -}}
+{{- with $sameAs }}{{ $entity = merge $entity (dict "sameAs" .) }}{{ end -}}
+
+{{- $openingHours := slice -}}
+{{- if and $seo.officeHorairesJours $seo.officeHorairesOpen $seo.officeHorairesClose -}}
+  {{- $openingHours = $openingHours | append (dict
+    "@type" "OpeningHoursSpecification"
+    "dayOfWeek" $seo.officeHorairesJours
+    "opens" $seo.officeHorairesOpen
+    "closes" $seo.officeHorairesClose
+  ) -}}
+{{- end -}}
+{{- if and $seo.officeHorairesJoursWE $seo.officeHorairesOpenWE $seo.officeHorairesCloseWE -}}
+  {{- $openingHours = $openingHours | append (dict
+    "@type" "OpeningHoursSpecification"
+    "dayOfWeek" $seo.officeHorairesJoursWE
+    "opens" $seo.officeHorairesOpenWE
+    "closes" $seo.officeHorairesCloseWE
+  ) -}}
+{{- end -}}
+{{- with $openingHours }}{{ $entity = merge $entity (dict "openingHoursSpecification" .) }}{{ end -}}
+{{- with $seo.personName }}{{ $entity = merge $entity (dict "employee" (dict "@id" (printf "%s#person" site.Home.Permalink))) }}{{ end -}}
+{{- return $entity -}}

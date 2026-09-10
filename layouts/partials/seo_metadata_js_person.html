@@ -1,0 +1,16 @@
+{{- $seo := partial "seo_common_vars.html" . -}}
+{{- $person := false -}}
+{{- with $seo.personName -}}
+  {{- $person = dict
+    "@type" "Person"
+    "@id" (printf "%s#person" site.Home.Permalink)
+    "name" .
+  -}}
+  {{- with $seo.personJobTitle }}{{ $person = merge $person (dict "jobTitle" .) }}{{ end -}}
+  {{- with $seo.personImage -}}
+    {{- with resources.Get . }}{{ $person = merge $person (dict "image" .Permalink) }}{{ end -}}
+  {{- end -}}
+  {{- $types := partial "seo_normalize_slice.html" site.Params.typeseo -}}
+  {{- if in $types "localbusiness" }}{{ $person = merge $person (dict "worksFor" (dict "@id" (printf "%s#business" site.Home.Permalink))) }}{{ end -}}
+{{- end -}}
+{{- return $person -}}

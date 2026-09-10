@@ -1,29 +1,48 @@
-{{- /* Gestion du type Web sur toutes les pages */ -}}
-{{- $var := "seo_metadata_js_web.html" -}}
-{{- /* schema.org Web */ -}}
-<script type="application/ld+json">
-{{ partial $var . | safeJS }}
-</script>
-
-{{- /* Gestion du partial selon existence de .typeseo dans la page */ -}}
+{{- /* Point d'entrée public : construit et sérialise un seul graphe JSON-LD. */ -}}
 {{- $context := . -}}
-{{- $typeseo := .Params.typeseo -}}
-{{- if .IsHome -}}
-  {{- /* HOME PAGE */ -}}
-  {{- $typeseo = site.Params.typeseo -}}
-{{- else -}}
-  {{- /* AUTRES PAGES */ -}}
-{{- end -}}
-{{- range $typeseo -}}
-  {{- $var := printf "seo_metadata_js_%s.html" . -}}
-  {{- $infoschema := printf "<!-- schema.org %s -->" . -}}
-  {{- $partialPath := printf "partials/%s" $var -}}
-  {{- if templates.Exists $partialPath -}}
-    {{ $infoschema | safeHTML }}
-    <script type="application/ld+json">
-    {{ partial $var $context | safeJS }}
-    </script>
-  {{- else -}}
-    {{- warnf "seo-schema-org: aucun partial trouvé pour typeseo %q (attendu: layouts/partials/%s) sur %s" . $var $context.Permalink -}}
+{{- $rawTypes := .Params.typeseo -}}
+{{- if .IsHome }}{{ $rawTypes = site.Params.typeseo }}{{ end -}}
+{{- $types := partial "seo_normalize_slice.html" $rawTypes -}}
+
+{{- $entities := slice -}}
+{{- $mainEntities := slice -}}
+{{- range (uniq $types) -}}
+  {{- $type := printf "%v" . | lower -}}
+  {{- /* WebPage is always added below; keep the historical "web" value as a no-op. */ -}}
+  {{- if ne $type "web" -}}
+    {{- $partial := printf "seo_metadata_js_%s.html" $type -}}
+    {{- $partialPath := printf "partials/%s" $partial -}}
+    {{- if templates.Exists $partialPath -}}
+      {{- $entity := partial $partial $context -}}
+      {{- with $entity -}}
+        {{- $entities = $entities | append . -}}
+        {{- with index . "@id" }}{{ $mainEntities = $mainEntities | append (dict "@id" .) }}{{ end -}}
+      {{- end -}}
+    {{- else -}}
+      {{- warnf "seo-schema-org: aucun partial trouvé pour typeseo %q (attendu: layouts/partials/%s) sur %s" $type $partial $context.Permalink -}}
+    {{- end -}}
   {{- end -}}
 {{- end -}}
+
+{{- $publisherID := "" -}}
+{{- if gt (len $mainEntities) 0 }}{{ $publisherID = index (index $mainEntities 0) "@id" }}{{ end -}}
+{{- $website := partial "seo_metadata_js_website.html" (dict "context" . "publisherID" $publisherID) -}}
+{{- $webpage := partial "seo_metadata_js_web.html" (dict "context" . "publisherID" $publisherID "mainEntities" $mainEntities) -}}
+{{- $person := partial "seo_metadata_js_person.html" . -}}
+
+{{- $graph := slice $website -}}
+{{- range $entities }}{{ $graph = $graph | append . }}{{ end -}}
+{{- with $person }}{{ $graph = $graph | append . }}{{ end -}}
+
+{{- $breadcrumbEnabled := false -}}
+{{- with site.Params.seo_schema }}{{ $breadcrumbEnabled = .breadcrumb | default false }}{{ end -}}
+{{- if and $breadcrumbEnabled (not .IsHome) (ne .Kind "404") -}}
+  {{- $breadcrumb := partial "seo_metadata_js_breadcrumb.html" . -}}
+  {{- $webpage = merge $webpage (dict "breadcrumb" (dict "@id" (index $breadcrumb "@id"))) -}}
+  {{- $graph = $graph | append $webpage $breadcrumb -}}
+{{- else -}}
+  {{- $graph = $graph | append $webpage -}}
+{{- end -}}
+
+{{- $schema := dict "@context" "https://schema.org" "@graph" $graph -}}
+<script type="application/ld+json">{{ $schema | jsonify | safeJS }}</script>

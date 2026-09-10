@@ -1,0 +1,5 @@
+{{- $url := "" -}}
+{{- range first 1 (partial "seo_normalize_slice.html" .images) -}}
+  {{- with resources.Get . }}{{ $url = (. | fingerprint "md5").Permalink }}{{ end -}}
+{{- end -}}
+{{- return $url -}}

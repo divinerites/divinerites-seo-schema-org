@@ -3,6 +3,9 @@
 {{ $var := .var }}
 
 {{ $temp := .context.Param ( printf "seo_json.%s" $var) }}
-{{ $param_var := .context.Param $temp }}
+{{ $param_var := "" }}
+{{ with $temp }}
+  {{ $param_var = $.context.Param . }}
+{{ end }}
 
 {{ return $param_var }}

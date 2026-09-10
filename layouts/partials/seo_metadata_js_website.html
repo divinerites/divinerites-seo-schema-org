@@ -1,0 +1,13 @@
+{{- $context := .context -}}
+{{- $seo := partial "seo_common_vars.html" $context -}}
+{{- $website := dict
+  "@type" "WebSite"
+  "@id" (printf "%s#website" site.Home.Permalink)
+  "url" site.Home.Permalink
+  "name" site.Title
+  "inLanguage" $context.Language.Lang
+-}}
+{{- $sameAs := partial "seo_social_links.html" $seo -}}
+{{- with $sameAs }}{{ $website = merge $website (dict "sameAs" .) }}{{ end -}}
+{{- with .publisherID }}{{ $website = merge $website (dict "publisher" (dict "@id" .)) }}{{ end -}}
+{{- return $website -}}

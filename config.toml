@@ -1,5 +1,9 @@
 [params]
 
+[params.seo_schema]
+  # Add a BreadcrumbList entity to non-home pages.
+  breadcrumb = false
+
 # Pour SEO ld+json
 # Correspondance entre :
 #   - les varialbles de config.toml (qui changent selon les sites)
@@ -22,17 +26,35 @@
   geo_longitude     = "my real variable name"
 
   officeAddress       = "my real variable name"
+  officeAddressName   = "my real variable name"
   officeAddressVille  = "my real variable name"
   officeAddressRegion = "my real variable name"
   officeAddressCP     = "my real variable name"
   officeAddressPays   = "my real variable name"
 
-  # propriété phone doit être unique pour schema.org
+  # Legacy scalar mapping; officePhones takes precedence when provided.
   officePhone = "my real variable name"
+  officePhones = "my real variable name"
 
   officeHorairesJours = "my real variable name"
   officeHorairesOpen  = "my real variable name"
   officeHorairesClose = "my real variable name"
+  officeHorairesJoursWE = "my real variable name"
+  officeHorairesOpenWE  = "my real variable name"
+  officeHorairesCloseWE = "my real variable name"
+
+  priceRange = "my real variable name"
+
+  # Optional Person entity linked to the business.
+  personName     = "my real variable name"
+  personJobTitle = "my real variable name"
+  personImage    = "my real variable name"
+
+  # Used by lodgingbusiness.
+  checkinTime   = "my real variable name"
+  checkoutTime  = "my real variable name"
+  numberOfRooms = "my real variable name"
+  petsAllowed   = "my real variable name"
 
   # Used by restaurant
   servesCuisine        = "TODO"

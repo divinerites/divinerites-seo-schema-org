@@ -1,91 +1,11 @@
-{{- /* Initialisation des variables communes via le partial partagé */ -}}
 {{- $seo := partial "seo_common_vars.html" . -}}
-
-{{- /* Variables spécifiques à EventVenue */ -}}
-{{- $seo_maximumAttendeeCapacity := partial "seo_find_param.html" (dict "context" . "var" "maximumAttendeeCapacity") -}}
-{{- $seo_amenityFeature          := partial "seo_find_param.html" (dict "context" . "var" "amenityFeature") -}}
-{{- $seo_smokingAllowed          := partial "seo_find_param.html" (dict "context" . "var" "smokingAllowed") -}}
-
-{{- /* Résolution du sameAs (priorité facebook > instagram > twitter) */ -}}
-{{- $sameAs := "" -}}
-{{- if $seo.social_facebook -}}
-  {{- $sameAs = $seo.social_facebook -}}
-{{- else if $seo.social_instagram -}}
-  {{- $sameAs = $seo.social_instagram -}}
-{{- else if $seo.social_twitter -}}
-  {{- $sameAs = $seo.social_twitter -}}
+{{- $entity := partial "seo_business_entity.html" (dict
+  "context" . "seo" $seo "type" "EventVenue"
+  "id" (printf "%s#eventvenue" .Permalink) "url" .Permalink
+) -}}
+{{- range $field := (slice "maximumAttendeeCapacity" "amenityFeature" "smokingAllowed") -}}
+  {{- with partial "seo_find_param.html" (dict "context" $ "var" $field) -}}
+    {{- $entity = merge $entity (dict $field .) -}}
+  {{- end -}}
 {{- end -}}
-
-{{- /* Image unique fingerprintée, réutilisée pour image + photo */ -}}
-{{- $imageURL := "" -}}
-{{- range first 1 $seo.image -}}
-  {{- $imageURL = (resources.Get . | fingerprint "md5").Permalink -}}
-{{- end -}}
-
-{{- $logoURL := "" -}}
-{{- if $seo.logo -}}
-  {{- $logoURL = (resources.Get $seo.logo | fingerprint "md5").Permalink -}}
-{{- end -}}
-
-{{- /* Construction du sous-objet mainEntity (EventVenue) */ -}}
-{{- $mainEntity := dict
-  "@type"        "EventVenue"
-  "@id"          .Permalink
-  "url"          .Permalink
-  "name"         (partial "seo_metadata_title" .)
-  "description"  (partial "seo_metadata_description" .)
-  "image"        $imageURL
-  "photo"        $imageURL
-  "logo"         $logoURL
-  "address" (dict
-    "@type"           "PostalAddress"
-    "streetAddress"   $seo.officeAddress
-    "addressLocality" $seo.officeAddressVille
-    "addressRegion"   $seo.officeAddressRegion
-    "postalCode"      $seo.officeAddressCP
-    "addressCountry"  $seo.officeAddressPays
-  )
-  "telephone"  ($seo.officePhone | safeHTML)
-  "geo" (dict
-    "@type"     $seo.geo_type
-    "latitude"  $seo.geo_latitude
-    "longitude" $seo.geo_longitude
-  )
-  "maximumAttendeeCapacity" ($seo_maximumAttendeeCapacity | safeHTML)
-  "amenityFeature"          $seo_amenityFeature
-  "smokingAllowed"          ($seo_smokingAllowed | safeHTML)
--}}
-
-{{- /* Construction de l'objet racine (WebPage) */ -}}
-{{- $root := dict
-  "@context" "http://schema.org/"
-  "@type"    "WebPage"
-  "mainEntityOfPage" (dict
-    "@type"   "WebSite"
-    "@id"     .Permalink
-    "url"     .Permalink
-    "sameAs"  $sameAs
-  )
-  "@id"            .Permalink
-  "url"            .Permalink
-  "name"           (partial "seo_metadata_title" .)
-  "headline"       (partial "seo_metadata_title" .)
-  "description"    (partial "seo_metadata_description" .)
-  "image"          $imageURL
-  "inLanguage"     .Language
-  "copyrightYear"  (now.Format "2006")
-  "datePublished"  (now.Format "2006-01-02")
-  "mainEntity"     $mainEntity
--}}
-
-{{- if not .Lastmod.IsZero -}}
-  {{- $root = merge $root (dict "dateModified" (.Lastmod.Format "2006-01-02")) -}}
-{{- end -}}
-
-{{- if .Keywords -}}
-  {{- $root = merge $root (dict "keywords" (delimit .Keywords ", ")) -}}
-{{- else if $seo.defaultKeywords -}}
-  {{- $root = merge $root (dict "keywords" (delimit $seo.defaultKeywords ", ")) -}}
-{{- end -}}
-
-{{ jsonify $root }}
+{{- return $entity -}}

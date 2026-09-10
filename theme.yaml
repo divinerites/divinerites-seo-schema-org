@@ -10,6 +10,11 @@ tags:
 - seo
 - schema.org
 features:
+- Version 3.0.0 - 10 septembre 2026 - Graphe JSON-LD unifié
+- Un seul bloc JSON-LD par page avec WebSite, WebPage et entités métier reliées par @id
+- Support de typeseo sous forme de chaîne ou de liste
+- Ajout optionnel de Person et BreadcrumbList
+- Téléphones multiples et horaires distincts en semaine et le week-end
 - Manage easily schema.org structured data
 - Version v1.1 - 12 juillet 2020
 - Ajoute js_campground SPECIFIQUE
@@ -23,7 +28,7 @@ features:
 - Ajout de Restaurant
 - Ajout de VacationRental
 - Ajout de EventVenue
-min_version: 0.70.0
+min_version: 0.112.0
 
 author:
 name: Didier Georgieff

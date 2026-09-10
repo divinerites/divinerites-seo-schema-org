@@ -1,105 +1,16 @@
-{{- /* Initialisation des variables communes via le partial partagé */ -}}
 {{- $seo := partial "seo_common_vars.html" . -}}
-
-{{- /* Variables spécifiques à VacationRental / containsPlace (chalet) */ -}}
-{{- $seo_numberOfRooms    := partial "seo_find_param.html" (dict "context" . "var" "numberOfRooms") -}}
-{{- $seo_numberOfBedrooms := partial "seo_find_param.html" (dict "context" . "var" "numberOfBedrooms") -}}
-{{- $seo_occupancy        := partial "seo_find_param.html" (dict "context" . "var" "occupancy") -}}
-{{- $seo_amenityFeature   := partial "seo_find_param.html" (dict "context" . "var" "amenityFeature") -}}
-{{- $seo_petsAllowed      := partial "seo_find_param.html" (dict "context" . "var" "petsAllowed") -}}
-
-{{- /* Résolution du sameAs (priorité facebook > instagram > twitter) */ -}}
-{{- $sameAs := "" -}}
-{{- if $seo.social_facebook -}}
-  {{- $sameAs = $seo.social_facebook -}}
-{{- else if $seo.social_instagram -}}
-  {{- $sameAs = $seo.social_instagram -}}
-{{- else if $seo.social_twitter -}}
-  {{- $sameAs = $seo.social_twitter -}}
+{{- $entity := partial "seo_business_entity.html" (dict
+  "context" . "seo" $seo "type" "VacationRental"
+  "id" (printf "%s#vacationrental" .Permalink) "url" .Permalink
+) -}}
+{{- $place := dict "@type" "Accommodation" -}}
+{{- range $field := (slice "numberOfRooms" "numberOfBedrooms" "amenityFeature" "petsAllowed") -}}
+  {{- with partial "seo_find_param.html" (dict "context" $ "var" $field) -}}
+    {{- $place = merge $place (dict $field .) -}}
+  {{- end -}}
 {{- end -}}
-
-{{- /* Image unique fingerprintée, réutilisée pour image + photo */ -}}
-{{- $imageURL := "" -}}
-{{- range first 1 $seo.image -}}
-  {{- $imageURL = (resources.Get . | fingerprint "md5").Permalink -}}
+{{- with partial "seo_find_param.html" (dict "context" . "var" "occupancy") -}}
+  {{- $place = merge $place (dict "occupancy" (dict "@type" "QuantitativeValue" "maxValue" .)) -}}
 {{- end -}}
-
-{{- $logoURL := "" -}}
-{{- if $seo.logo -}}
-  {{- $logoURL = (resources.Get $seo.logo | fingerprint "md5").Permalink -}}
-{{- end -}}
-
-{{- /* containsPlace : description de l'hébergement (chalet) au sein de la VacationRental */ -}}
-{{- $containsPlace := dict
-  "@type"           "Accommodation"
-  "numberOfRooms"    ($seo_numberOfRooms | safeHTML)
-  "numberOfBedrooms" ($seo_numberOfBedrooms | safeHTML)
-  "occupancy" (dict
-    "@type"    "QuantitativeValue"
-    "maxValue" ($seo_occupancy | safeHTML)
-  )
-  "amenityFeature" $seo_amenityFeature
-  "petsAllowed"    ($seo_petsAllowed | safeHTML)
--}}
-
-{{- /* Construction du sous-objet mainEntity (VacationRental) */ -}}
-{{- $mainEntity := dict
-  "@type"        "VacationRental"
-  "@id"          .Permalink
-  "url"          .Permalink
-  "name"         (partial "seo_metadata_title" .)
-  "description"  (partial "seo_metadata_description" .)
-  "image"        $imageURL
-  "photo"        $imageURL
-  "logo"         $logoURL
-  "address" (dict
-    "@type"           "PostalAddress"
-    "streetAddress"   $seo.officeAddress
-    "addressLocality" $seo.officeAddressVille
-    "addressRegion"   $seo.officeAddressRegion
-    "postalCode"      $seo.officeAddressCP
-    "addressCountry"  $seo.officeAddressPays
-  )
-  "telephone"  ($seo.officePhone | safeHTML)
-  "priceRange" $seo.priceRange
-  "geo" (dict
-    "@type"     $seo.geo_type
-    "latitude"  $seo.geo_latitude
-    "longitude" $seo.geo_longitude
-  )
-  "containsPlace" $containsPlace
--}}
-
-{{- /* Construction de l'objet racine (WebPage) */ -}}
-{{- $root := dict
-  "@context" "http://schema.org/"
-  "@type"    "WebPage"
-  "mainEntityOfPage" (dict
-    "@type"   "WebSite"
-    "@id"     .Permalink
-    "url"     .Permalink
-    "sameAs"  $sameAs
-  )
-  "@id"            .Permalink
-  "url"            .Permalink
-  "name"           (partial "seo_metadata_title" .)
-  "headline"       (partial "seo_metadata_title" .)
-  "description"    (partial "seo_metadata_description" .)
-  "image"          $imageURL
-  "inLanguage"     .Language
-  "copyrightYear"  (now.Format "2006")
-  "datePublished"  (now.Format "2006-01-02")
-  "mainEntity"     $mainEntity
--}}
-
-{{- if not .Lastmod.IsZero -}}
-  {{- $root = merge $root (dict "dateModified" (.Lastmod.Format "2006-01-02")) -}}
-{{- end -}}
-
-{{- if .Keywords -}}
-  {{- $root = merge $root (dict "keywords" (delimit .Keywords ", ")) -}}
-{{- else if $seo.defaultKeywords -}}
-  {{- $root = merge $root (dict "keywords" (delimit $seo.defaultKeywords ", ")) -}}
-{{- end -}}
-
-{{ jsonify $root }}
+{{- if gt (len $place) 1 }}{{ $entity = merge $entity (dict "containsPlace" $place) }}{{ end -}}
+{{- return $entity -}}

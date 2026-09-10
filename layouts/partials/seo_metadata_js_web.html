@@ -1,49 +1,33 @@
-<!-- Initialisation des variables selon [params.seo_json] de config.toml -->
-<!-- $var = the desired variable for SEO ld+json -->
-{{- $var := "social_facebook" | default "" -}}
-{{- $seo_social_facebook := partial "seo_find_param.html" (dict "context" . "var" $var ) -}}
-{{- $var := "social_twitter" | default "" -}}
-{{- $seo_social_twitter := partial "seo_find_param.html" (dict "context" . "var" $var ) -}}
-{{- $var := "social_instagram" | default "" -}}
-{{- $seo_social_instagram := partial "seo_find_param.html" (dict "context" . "var" $var ) -}}
-{{- $var := "image" | default "" -}}
-{{- $seo_image := partial "seo_find_param.html" (dict "context" . "var" $var ) -}}
-{{- $var := "defaultKeywords" | default "" -}}
-{{- $seo_defaultKeywords := partial "seo_find_param.html" (dict "context" . "var" $var ) -}}
-
-<!--  SEO code for ld-+son -->
-{
-  "@context": "http://schema.org/",
-  "@type": "WebPage",
-  "mainEntityOfPage": {
-    "@type": "WebSite",
-    "@id": "{{ .Permalink }}",
-    "url": "{{ .Permalink }}",
-    "sameAs":
-    {{- if $seo_social_facebook -}}
-    "{{ $seo_social_facebook }}"
-    {{- else if $seo_social_instagram -}}
-    "{{ $seo_social_instagram }}"
-    {{- else if $seo_social_twitter -}}
-    "{{ $seo_social_twitter }}"
-    {{- end }}
-  },
-  "@id": "{{ .Permalink }}",
-  "url": "{{ .Permalink }}",
-  "name" : "{{ partial "seo_metadata_title" . }}",
-  "headline" : "{{ partial "seo_metadata_title" . }}",
-  "description": "{{ partial "seo_metadata_description" . }}",
-  "image": "{{ range first 1 $seo_image }}{{ (resources.Get . | fingerprint "md5").Permalink }}{{ end }}",
-  "inLanguage" : "{{ .Language }}",
-  "copyrightYear" : "{{ now.Format "2006" }}",
-  "datePublished": "{{ now.Format "2006-01-02" }}",
-  {{ if not .Lastmod.IsZero }}"dateModified" : "{{ .Lastmod.Format "2006-01-02" }}"{{ end }}
-  {{- if or .Keywords $seo_defaultKeywords -}}
-  ,
-  {{- end }}
-  {{ if .Keywords }}
-  "keywords" : "{{ delimit .Keywords ", " }}"
-  {{- else if $seo_defaultKeywords -}}
-  "keywords" : "{{ delimit $seo_defaultKeywords ", " }}"
-  {{ end -}}
-}
+{{- $context := .context -}}
+{{- $seo := partial "seo_common_vars.html" $context -}}
+{{- $webpage := dict
+  "@type" "WebPage"
+  "@id" (printf "%s#webpage" $context.Permalink)
+  "url" $context.Permalink
+  "name" (partial "seo_metadata_title" $context)
+  "description" (partial "seo_metadata_description" $context)
+  "inLanguage" $context.Language.Lang
+  "isPartOf" (dict "@id" (printf "%s#website" site.Home.Permalink))
+-}}
+{{- with .publisherID }}{{ $webpage = merge $webpage (dict "publisher" (dict "@id" .)) }}{{ end -}}
+{{- with .mainEntities -}}
+  {{- if eq (len .) 1 -}}
+    {{- $webpage = merge $webpage (dict "mainEntity" (index . 0)) -}}
+  {{- else -}}
+    {{- $webpage = merge $webpage (dict "mainEntity" .) -}}
+  {{- end -}}
+{{- end -}}
+{{- $imageURL := partial "seo_primary_image.html" (dict "context" $context "images" $seo.image) -}}
+{{- with $imageURL }}{{ $webpage = merge $webpage (dict "primaryImageOfPage" (dict "@type" "ImageObject" "url" .)) }}{{ end -}}
+{{- $published := $context.PublishDate -}}
+{{- if $published.IsZero }}{{ $published = $context.Date }}{{ end -}}
+{{- if not $published.IsZero }}{{ $webpage = merge $webpage (dict "datePublished" ($published.Format "2006-01-02T15:04:05Z07:00")) }}{{ end -}}
+{{- if not $context.Lastmod.IsZero }}{{ $webpage = merge $webpage (dict "dateModified" ($context.Lastmod.Format "2006-01-02T15:04:05Z07:00")) }}{{ end -}}
+{{- if $context.Keywords -}}
+  {{- $webpage = merge $webpage (dict "keywords" (delimit $context.Keywords ", ")) -}}
+{{- else -}}
+  {{- with $seo.defaultKeywords -}}
+    {{- $webpage = merge $webpage (dict "keywords" (delimit . ", ")) -}}
+  {{- end -}}
+{{- end -}}
+{{- return $webpage -}}

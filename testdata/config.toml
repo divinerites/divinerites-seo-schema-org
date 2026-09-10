@@ -1,0 +1,53 @@
+baseURL = "https://example.org/"
+title = "Example practice"
+defaultContentLanguage = "en"
+
+[languages.en]
+  locale = "en"
+
+[params]
+  typeseo = "localbusiness"
+  home = "Home"
+
+  [params.seo_schema]
+    breadcrumb = true
+
+  [params.seo_json]
+    social_facebook = "schema.facebook"
+    social_twitter = "schema.twitter"
+    defaultKeywords = "schema.keywords"
+    officeAddress = "schema.address"
+    officeAddressVille = "schema.city"
+    officeAddressRegion = "schema.region"
+    officeAddressCP = "schema.postalCode"
+    officeAddressPays = "schema.country"
+    officePhones = "schema.phones"
+    officeHorairesJours = "schema.weekdays"
+    officeHorairesOpen = "schema.weekdayOpen"
+    officeHorairesClose = "schema.weekdayClose"
+    officeHorairesJoursWE = "schema.weekendDays"
+    officeHorairesOpenWE = "schema.weekendOpen"
+    officeHorairesCloseWE = "schema.weekendClose"
+    priceRange = "schema.priceRange"
+    personName = "schema.personName"
+    personJobTitle = "schema.personJobTitle"
+
+  [params.schema]
+    facebook = "https://www.facebook.com/example"
+    twitter = "https://twitter.com/example"
+    keywords = ["practice", "example"]
+    address = "1 Example Street"
+    city = "Example City"
+    region = "Example Region"
+    postalCode = "12345"
+    country = "FR"
+    phones = ["+33 1 02 03 04 05", "+33 6 07 08 09 10"]
+    weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+    weekdayOpen = "08:30"
+    weekdayClose = "19:00"
+    weekendDays = ["Saturday"]
+    weekendOpen = "08:30"
+    weekendClose = "12:00"
+    priceRange = "65 €"
+    personName = "Example Practitioner"
+    personJobTitle = "Practitioner"
