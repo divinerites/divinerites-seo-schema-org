@@ -2,9 +2,10 @@
 
 name: Manage easily schema.org structured data
 license: GPLv3
-licenselink:
+licenselink: https://www.gnu.org/licenses/gpl-3.0.html
 description: Manage easily seo structured data
-homepage:
+homepage: https://github.com/divinerites/divinerites-seo-schema-org
+version: 3.0.0
 tags:
 - component
 - seo
@@ -31,4 +32,4 @@ features:
 min_version: 0.112.0
 
 author:
-name: Didier Georgieff
+  name: Didier Georgieff
