@@ -3,6 +3,6 @@
   "@id" (printf "%s#breadcrumb" .Permalink)
   "itemListElement" (slice
     (dict "@type" "ListItem" "position" 1 "name" (site.Params.home | default "Home") "item" site.Home.Permalink)
-    (dict "@type" "ListItem" "position" 2 "name" .Title "item" .Permalink)
+    (dict "@type" "ListItem" "position" 2 "name" (.Params.breadcrumbTitle | default .LinkTitle) "item" .Permalink)
   )
 -}}

@@ -10,6 +10,11 @@ This library keeps a generic mapping layer between:
 
 ## Changelog
 
+### v3.0.2 - 10 septembre 2026
+
+- Keep business entity names and descriptions stable across pages, with optional `businessName` and `businessDescription` mappings
+- Use the page title for `WebPage.name` and allow a concise `breadcrumbTitle` in breadcrumbs
+
 ### v3.0.1 - 10 septembre 2026
 
 - Declare the Go/Hugo module path as `github.com/divinerites/divinerites-seo-schema-org/v3`
@@ -88,6 +93,8 @@ File: `config.toml`
   social_instagram  = "my real variable name"
   image             = "my real variable name"
   defaultKeywords   = "my real variable name"
+  businessName      = "my real variable name"
+  businessDescription = "my real variable name"
 
   # used by localbusiness / lodgingbusiness / restaurant / vacationrental / eventvenue
   logo              = "my real variable name"

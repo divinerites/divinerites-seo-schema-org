@@ -24,6 +24,10 @@ for (const testCase of cases) {
   if (types.includes('BreadcrumbList') !== testCase.breadcrumb) throw new Error(`${testCase.file}: invalid breadcrumb presence`);
 
   const business = graph.find((entity) => entity['@type'] === 'LocalBusiness');
+  if (business.name !== 'Example Practice Ltd') throw new Error(`${testCase.file}: unstable business name`);
+  if (business.description !== 'Stable example business description') {
+    throw new Error(`${testCase.file}: unstable business description`);
+  }
   if (business.telephone.length !== 2) throw new Error(`${testCase.file}: phone compatibility failed`);
   if (business.openingHoursSpecification.length !== 2) throw new Error(`${testCase.file}: weekend hours missing`);
   if (business.priceRange !== '65 €') throw new Error(`${testCase.file}: optional priceRange missing`);
@@ -36,7 +40,14 @@ for (const testCase of cases) {
   if (person.worksFor?.['@id'] !== business['@id']) throw new Error(`${testCase.file}: Person business link missing`);
 
   const webpage = graph.find((entity) => entity['@type'] === 'WebPage');
+  const expectedPageName = testCase.file === 'index.html' ? 'Example home' : testCase.file.split('/')[0][0].toUpperCase() + testCase.file.split('/')[0].slice(1);
+  if (webpage.name !== expectedPageName) throw new Error(`${testCase.file}: invalid WebPage name ${webpage.name}`);
   if (!webpage.datePublished.startsWith('2024-')) throw new Error(`${testCase.file}: content publication date not used`);
+
+  if (testCase.file === 'about/index.html') {
+    const breadcrumb = graph.find((entity) => entity['@type'] === 'BreadcrumbList');
+    if (breadcrumb.itemListElement[1].name !== 'About us') throw new Error(`${testCase.file}: concise breadcrumb label missing`);
+  }
 }
 
 console.log('Schema.org graph tests passed');

@@ -4,7 +4,7 @@
   "@type" "WebPage"
   "@id" (printf "%s#webpage" $context.Permalink)
   "url" $context.Permalink
-  "name" (partial "seo_metadata_title" $context)
+  "name" $context.Title
   "description" (partial "seo_metadata_description" $context)
   "inLanguage" $context.Language.Lang
   "isPartOf" (dict "@id" (printf "%s#website" site.Home.Permalink))

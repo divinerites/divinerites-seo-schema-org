@@ -20,6 +20,9 @@
   social_instagram  = "my real variable name"
   image             = "my real variable name"
   defaultKeywords   = "my real variable name"
+  # Optional stable identity for business entities. Defaults to site title/description.
+  businessName        = "my real variable name"
+  businessDescription = "my real variable name"
 
   # Used by localbusiness
   logo              = "my real variable name"

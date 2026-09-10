@@ -1,11 +1,16 @@
 {{- $context := .context -}}
 {{- $seo := .seo -}}
+{{- $businessName := $seo.businessName | default site.Title -}}
+{{- $businessDescription := $seo.businessDescription | default site.Params.description -}}
+{{- if not $businessDescription }}
+  {{- $businessDescription = partial "seo_metadata_description" $context -}}
+{{- end -}}
 {{- $entity := dict
   "@type" .type
   "@id" .id
   "url" .url
-  "name" (partial "seo_metadata_title" $context)
-  "description" (partial "seo_metadata_description" $context)
+  "name" $businessName
+  "description" $businessDescription
 -}}
 
 {{- $imageURL := partial "seo_primary_image.html" (dict "context" $context "images" $seo.image) -}}
