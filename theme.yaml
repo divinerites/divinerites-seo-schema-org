@@ -5,12 +5,13 @@ license: GPLv3
 licenselink: https://www.gnu.org/licenses/gpl-3.0.html
 description: Manage easily seo structured data
 homepage: https://github.com/divinerites/divinerites-seo-schema-org
-version: 3.0.0
+version: 3.0.1
 tags:
 - component
 - seo
 - schema.org
 features:
+- Version 3.0.1 - 10 septembre 2026 - Chemin de module Go compatible avec la version majeure v3
 - Version 3.0.0 - 10 septembre 2026 - Graphe JSON-LD unifié
 - Un seul bloc JSON-LD par page avec WebSite, WebPage et entités métier reliées par @id
 - Support de typeseo sous forme de chaîne ou de liste

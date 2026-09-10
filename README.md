@@ -10,6 +10,10 @@ This library keeps a generic mapping layer between:
 
 ## Changelog
 
+### v3.0.1 - 10 septembre 2026
+
+- Declare the Go/Hugo module path as `github.com/divinerites/divinerites-seo-schema-org/v3`
+
 ### v3.0.0 - 10 septembre 2026
 
 - Generate one JSON-LD script and one `@graph` per page
