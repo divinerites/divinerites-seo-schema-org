@@ -30,7 +30,11 @@
 {{- $officeHorairesOpenWE  := partial $find (dict "context" $context "var" "officeHorairesOpenWE") -}}
 {{- $officeHorairesCloseWE := partial $find (dict "context" $context "var" "officeHorairesCloseWE") -}}
 {{- $priceRange          := partial $find (dict "context" $context "var" "priceRange") -}}
+{{- $priceAmount         := partial $find (dict "context" $context "var" "priceAmount") -}}
+{{- $priceCurrencySymbol := partial $find (dict "context" $context "var" "priceCurrencySymbol") -}}
 {{- $personName          := partial $find (dict "context" $context "var" "personName") -}}
+{{- $personGivenName     := partial $find (dict "context" $context "var" "personGivenName") -}}
+{{- $personFamilyName    := partial $find (dict "context" $context "var" "personFamilyName") -}}
 {{- $personJobTitle      := partial $find (dict "context" $context "var" "personJobTitle") -}}
 {{- $personImage         := partial $find (dict "context" $context "var" "personImage") -}}
 
@@ -58,7 +62,11 @@
   "officeHorairesOpenWE"  $officeHorairesOpenWE
   "officeHorairesCloseWE" $officeHorairesCloseWE
   "priceRange"           $priceRange
+  "priceAmount"          $priceAmount
+  "priceCurrencySymbol"  $priceCurrencySymbol
   "personName"           $personName
+  "personGivenName"      $personGivenName
+  "personFamilyName"     $personFamilyName
   "personJobTitle"       $personJobTitle
   "personImage"          $personImage
 -}}

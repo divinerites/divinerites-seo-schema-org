@@ -1,16 +1,22 @@
-{{- $seo := partial "seo_common_vars.html" . -}}
+{{- $context := .context -}}
+{{- $seo := partial "seo_common_vars.html" $context -}}
 {{- $person := false -}}
-{{- with $seo.personName -}}
+{{- $personName := $seo.personName -}}
+{{- if and (not $personName) (or $seo.personGivenName $seo.personFamilyName) -}}
+  {{- $personName = delimit (partial "seo_normalize_slice.html" (slice $seo.personGivenName $seo.personFamilyName)) " " -}}
+{{- end -}}
+{{- with $personName -}}
   {{- $person = dict
     "@type" "Person"
     "@id" (printf "%s#person" site.Home.Permalink)
     "name" .
   -}}
+  {{- with $seo.personGivenName }}{{ $person = merge $person (dict "givenName" .) }}{{ end -}}
+  {{- with $seo.personFamilyName }}{{ $person = merge $person (dict "familyName" .) }}{{ end -}}
   {{- with $seo.personJobTitle }}{{ $person = merge $person (dict "jobTitle" .) }}{{ end -}}
   {{- with $seo.personImage -}}
     {{- with resources.Get . }}{{ $person = merge $person (dict "image" .Permalink) }}{{ end -}}
   {{- end -}}
-  {{- $types := partial "seo_normalize_slice.html" site.Params.typeseo -}}
-  {{- if in $types "localbusiness" }}{{ $person = merge $person (dict "worksFor" (dict "@id" (printf "%s#business" site.Home.Permalink))) }}{{ end -}}
+  {{- with $.businessID }}{{ $person = merge $person (dict "worksFor" (dict "@id" .)) }}{{ end -}}
 {{- end -}}
 {{- return $person -}}

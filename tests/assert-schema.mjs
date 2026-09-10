@@ -5,6 +5,7 @@ const publicDir = process.argv[2];
 const cases = [
   { file: 'index.html', breadcrumb: false, types: ['WebSite', 'LocalBusiness', 'Person', 'WebPage'] },
   { file: 'about/index.html', breadcrumb: true, types: ['WebSite', 'LocalBusiness', 'Restaurant', 'Person', 'WebPage', 'BreadcrumbList'] },
+  { file: 'contact/index.html', breadcrumb: true, types: ['WebSite', 'LocalBusiness', 'Person', 'WebPage', 'BreadcrumbList'] },
 ];
 
 for (const testCase of cases) {
@@ -26,6 +27,13 @@ for (const testCase of cases) {
   if (business.telephone.length !== 2) throw new Error(`${testCase.file}: phone compatibility failed`);
   if (business.openingHoursSpecification.length !== 2) throw new Error(`${testCase.file}: weekend hours missing`);
   if (business.priceRange !== '65 €') throw new Error(`${testCase.file}: optional priceRange missing`);
+
+  const person = graph.find((entity) => entity['@type'] === 'Person');
+  if (person.name !== 'Example Practitioner') throw new Error(`${testCase.file}: data-backed Person name missing`);
+  if (person.givenName !== 'Example' || person.familyName !== 'Practitioner') {
+    throw new Error(`${testCase.file}: Person name parts missing`);
+  }
+  if (person.worksFor?.['@id'] !== business['@id']) throw new Error(`${testCase.file}: Person business link missing`);
 
   const webpage = graph.find((entity) => entity['@type'] === 'WebPage');
   if (!webpage.datePublished.startsWith('2024-')) throw new Error(`${testCase.file}: content publication date not used`);

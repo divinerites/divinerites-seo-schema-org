@@ -5,7 +5,17 @@
 {{ $temp := .context.Param ( printf "seo_json.%s" $var) }}
 {{ $param_var := "" }}
 {{ with $temp }}
-  {{ $param_var = $.context.Param . }}
+  {{ if reflect.IsSlice . }}
+    {{ $values := slice }}
+    {{ range . }}
+      {{ with partial "seo_resolve_path.html" (dict "context" $.context "path" .) }}
+        {{ $values = $values | append . }}
+      {{ end }}
+    {{ end }}
+    {{ $param_var = $values }}
+  {{ else }}
+    {{ $param_var = partial "seo_resolve_path.html" (dict "context" $.context "path" .) }}
+  {{ end }}
 {{ end }}
 
 {{ return $param_var }}

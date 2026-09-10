@@ -35,7 +35,11 @@
 {{- $phones := partial "seo_normalize_slice.html" $seo.officePhones -}}
 {{- if eq (len $phones) 0 }}{{ $phones = partial "seo_normalize_slice.html" $seo.officePhone }}{{ end -}}
 {{- with $phones }}{{ $entity = merge $entity (dict "telephone" .) }}{{ end -}}
-{{- with $seo.priceRange }}{{ $entity = merge $entity (dict "priceRange" .) }}{{ end -}}
+{{- $priceRange := $seo.priceRange -}}
+{{- if and (not $priceRange) $seo.priceAmount -}}
+  {{- $priceRange = printf "%v%s" $seo.priceAmount (cond (not $seo.priceCurrencySymbol) "" (printf " %s" $seo.priceCurrencySymbol)) -}}
+{{- end -}}
+{{- with $priceRange }}{{ $entity = merge $entity (dict "priceRange" .) }}{{ end -}}
 {{- $sameAs := partial "seo_social_links.html" $seo -}}
 {{- with $sameAs }}{{ $entity = merge $entity (dict "sameAs" .) }}{{ end -}}
 
@@ -57,5 +61,5 @@
   ) -}}
 {{- end -}}
 {{- with $openingHours }}{{ $entity = merge $entity (dict "openingHoursSpecification" .) }}{{ end -}}
-{{- with $seo.personName }}{{ $entity = merge $entity (dict "employee" (dict "@id" (printf "%s#person" site.Home.Permalink))) }}{{ end -}}
+{{- if or $seo.personName $seo.personGivenName $seo.personFamilyName }}{{ $entity = merge $entity (dict "employee" (dict "@id" (printf "%s#person" site.Home.Permalink))) }}{{ end -}}
 {{- return $entity -}}

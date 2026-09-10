@@ -18,6 +18,8 @@ This library keeps a generic mapping layer between:
 - Use the page publication and modification dates instead of build time
 - Support multiple phone numbers, separate weekday/weekend opening hours, and optional `priceRange`
 - Treat unmapped optional fields as absent instead of failing the Hugo build
+- Resolve mappings from Hugo parameters or language data files with `data.*`; arrays of mappings are combined into a list
+- Build `priceRange` from separate amount/symbol fields and `Person.name` from given/family names when needed
 - Breaking change for custom `seo_metadata_js_<type>.html` partials: they must return an entity `dict`; the entry point owns JSON serialization
 
 ### v2.1 - 26 juillet 2026
@@ -110,9 +112,14 @@ File: `config.toml`
   officeHorairesCloseWE = "my real variable name"
 
   priceRange = "my real variable name"
+  # alternative for a centralized amount and display symbol
+  priceAmount         = "data.contact.tarifMontant"
+  priceCurrencySymbol = "data.contact.tarifSymbole"
 
   # optional Person entity
   personName     = "my real variable name"
+  personGivenName  = "data.contact.first_name"
+  personFamilyName = "data.contact.last_name"
   personJobTitle = "my real variable name"
   personImage    = "my real variable name"
 
@@ -188,6 +195,8 @@ typeseo = ["localbusiness", "restaurant"]
 backward compatibility but is not required. Set
 `params.seo_schema.breadcrumb = true` to add a `BreadcrumbList` to non-home
 pages. A `Person` is added when `personName` resolves to a non-empty value.
+Set `params.seo_schema.inherit_site_types = true` when site-level `typeseo`
+must also apply to every page that does not define its own value.
 
 ## Architecture internals
 
@@ -225,6 +234,24 @@ pages. A `Person` is added when `personName` resolves to a non-empty value.
 
 Do not serialize the custom entity. `seo_metadata.html` serializes the complete
 graph once.
+
+### Mapping values from data files
+
+A mapping normally resolves a Hugo parameter, preserving the historical API:
+
+```toml
+officeAddress = "global.seo.addresse.addresse"
+```
+
+Prefix the path with `data.` to resolve it below the current language in
+`data/<language>/`. A mapping can also be an array when the schema property
+expects multiple values:
+
+```toml
+officePhones = ["data.contact.phone1", "data.contact.phone2"]
+```
+
+Missing data paths are omitted without failing the build.
 
 If `typeseo = ["mytype"]` is declared but `seo_metadata_js_mytype.html` does not exist, the build will emit a warning instead of crashing.
 

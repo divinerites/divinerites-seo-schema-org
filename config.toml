@@ -3,6 +3,8 @@
 [params.seo_schema]
   # Add a BreadcrumbList entity to non-home pages.
   breadcrumb = false
+  # Reuse site-level typeseo on pages without a page-level value.
+  inherit_site_types = false
 
 # Pour SEO ld+json
 # Correspondance entre :
@@ -44,9 +46,14 @@
   officeHorairesCloseWE = "my real variable name"
 
   priceRange = "my real variable name"
+  # Optional alternative when the amount and display symbol are stored separately.
+  priceAmount = "my real variable name"
+  priceCurrencySymbol = "my real variable name"
 
   # Optional Person entity linked to the business.
   personName     = "my real variable name"
+  personGivenName  = "my real variable name"
+  personFamilyName = "my real variable name"
   personJobTitle = "my real variable name"
   personImage    = "my real variable name"
 

@@ -1,7 +1,9 @@
 {{- /* Point d'entrée public : construit et sérialise un seul graphe JSON-LD. */ -}}
 {{- $context := . -}}
 {{- $rawTypes := .Params.typeseo -}}
-{{- if .IsHome }}{{ $rawTypes = site.Params.typeseo }}{{ end -}}
+{{- $inheritSiteTypes := false -}}
+{{- with site.Params.seo_schema }}{{ $inheritSiteTypes = .inherit_site_types | default false }}{{ end -}}
+{{- if or .IsHome (and $inheritSiteTypes (not $rawTypes)) }}{{ $rawTypes = site.Params.typeseo }}{{ end -}}
 {{- $types := partial "seo_normalize_slice.html" $rawTypes -}}
 
 {{- $entities := slice -}}
@@ -28,7 +30,7 @@
 {{- if gt (len $mainEntities) 0 }}{{ $publisherID = index (index $mainEntities 0) "@id" }}{{ end -}}
 {{- $website := partial "seo_metadata_js_website.html" (dict "context" . "publisherID" $publisherID) -}}
 {{- $webpage := partial "seo_metadata_js_web.html" (dict "context" . "publisherID" $publisherID "mainEntities" $mainEntities) -}}
-{{- $person := partial "seo_metadata_js_person.html" . -}}
+{{- $person := partial "seo_metadata_js_person.html" (dict "context" . "businessID" $publisherID) -}}
 
 {{- $graph := slice $website -}}
 {{- range $entities }}{{ $graph = $graph | append . }}{{ end -}}

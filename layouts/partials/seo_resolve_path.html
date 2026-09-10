@@ -1,0 +1,18 @@
+{{- $context := .context -}}
+{{- $path := printf "%v" .path -}}
+{{- $value := "" -}}
+{{- if hasPrefix $path "data." -}}
+  {{- $value = index hugo.Data $context.Language.Lang -}}
+  {{- $found := true -}}
+  {{- range after 1 (split $path ".") -}}
+    {{- if and $found (isset $value .) -}}
+      {{- $value = index $value . -}}
+    {{- else -}}
+      {{- $found = false -}}
+      {{- $value = "" -}}
+    {{- end -}}
+  {{- end -}}
+{{- else -}}
+  {{- $value = $context.Param $path -}}
+{{- end -}}
+{{- return $value -}}
